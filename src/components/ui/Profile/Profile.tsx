@@ -5,8 +5,8 @@ const Profile = () => {
         <div className={styles.container}>
             <div className={styles.content}>
                 <span className={styles.avatar}></span>
-                <span className={styles.name}>John Doe</span>
-                <span className={styles.email}>johndoe@example.com</span>
+                <span className={styles.name}>Jaki Ganteng</span>
+                <span className={styles.email}>jaki@example.com</span>
             </div>
         </div>
     )

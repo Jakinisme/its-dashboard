@@ -8,25 +8,25 @@ import styles from "./Dashboard.module.css";
 const Dashboard = () => {
     const gaugeData: GaugeData[] = [
         {
-            name: "Kelembapan Tanah",
+            name: "Soil Moisture",
             value: 50,
             maxValue: 100,
             color: "#8884d8"
         },
         {
-            name: "Kelembapan Udara",
+            name: "Air Humidity",
             value: 60,
             maxValue: 100,
             color: "#82ca9d"
         },
         {
-            name: "Suhu",
+            name: "Temperature",
             value: 45,
             maxValue: 100,
             color: "#ffc658"
         },
         {
-            name: "Intensitas Cahaya",
+            name: "Light Intensity",
             value: 85,
             maxValue: 100,
             color: "#ff7300"
@@ -41,6 +41,7 @@ const Dashboard = () => {
             { name: "Apr", tes1: 2780, tes2: 3908, tes3: 2500 },
             { name: "May", tes1: 1890, tes2: 4800, tes3: 2100 },
             { name: "Jun", tes1: 2390, tes2: 3800, tes3: 2300 },
+            { name: "Jul", tes1: 3490, tes2: 4300, tes3: 2400 },
         ],
         dataKeys: ["tes1", "tes2", "tes3"],
         colors: ["#8884d8", "#82ca9d", "#ffc658"]
@@ -48,11 +49,11 @@ const Dashboard = () => {
 
     const content = [
         {
-            item: <Gauges data={gaugeData} title="Ini Gauges" />, 
+            item: <Gauges data={gaugeData} title="Gauges" />, 
             className: styles.Gauges
         },
         {
-            item: <Graph data={graphData} title="Ini Grafik" type="line" />,
+            item: <Graph data={graphData} title="Graph" type="area" />,
             className: styles.Graph
         }
     ]

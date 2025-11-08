@@ -8,6 +8,7 @@ interface GaugesProps {
 }
 
 const Gauges = ({ data, title = 'Gauges' }: GaugesProps) => {
+    
   const chartData = data.map((item, index) => ({
     key: index,
     name: item.name,
@@ -24,7 +25,7 @@ const Gauges = ({ data, title = 'Gauges' }: GaugesProps) => {
           const percentage = (gauge.value / gauge.maxValue) * 100;
           const chartDataForGauge = [
             { name: 'value', value: gauge.value, fill: gauge.fill },
-            { name: 'remaining', value: gauge.maxValue - gauge.value, fill: '#e0e0e0' },
+            { name: 'remaining', value: gauge.maxValue - gauge.value, fill: '#ffffffff' },
           ];
 
           return (
