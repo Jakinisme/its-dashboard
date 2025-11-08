@@ -1,14 +1,7 @@
-import React from 'react'
 
-interface ButtonProps {
-    children: React.ReactNode
-    className?: string
-    type?: 'button' | 'submit'
-    disabled?: boolean
-    onClick?: () => void
-}
+import type { button } from '../../../types/button'
 
-const Button = (props : ButtonProps) => {
+const Button = (props : button) => {
     const { children, className, type = 'button', disabled = false, onClick } = props
 
     return (

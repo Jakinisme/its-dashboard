@@ -2,7 +2,7 @@
   width: 100%;
   max-width: 100%;
   padding: 20px;
-  background: #fff;
+  background: linear-gradient(180deg, #1a1f2e 0%, #0f1419 100%);
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   box-sizing: border-box;
@@ -13,7 +13,7 @@
   margin: 0 0 20px 0;
   font-size: 24px;
   font-weight: 600;
-  color: #333;
+  color: #ffffff;
 }
 
 .gaugesGrid {
@@ -35,7 +35,7 @@
   margin: 0 0 10px 0;
   font-size: 16px;
   font-weight: 500;
-  color: #555;
+  color: #ffffff;
   text-align: center;
 }
 
@@ -47,19 +47,19 @@
 .value {
   font-size: 24px;
   font-weight: 700;
-  color: #333;
+  color: #ffffff;
 }
 
 .maxValue {
   font-size: 18px;
-  color: #666;
+  color: #fdfdfd;
   margin-left: 4px;
 }
 
 .percentage {
   display: block;
   font-size: 14px;
-  color: #888;
+  color: #ffffff;
   margin-top: 4px;
 }
 

@@ -2,6 +2,7 @@ import Gauges from "../../ui/Gauges";
 import Graph from "../../ui/Graph";
 import type { GaugeData, GraphData } from "../../../types/charts";
 
+import '../../../styles/global.css';
 import styles from "./Dashboard.module.css";
 
 const Dashboard = () => {
