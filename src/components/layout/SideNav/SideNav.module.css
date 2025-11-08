@@ -1,0 +1,299 @@
+.SideNav {
+  position: fixed;
+  left: 0;
+  top: 0;
+  height: 100vh;
+  width: 280px;
+  background: linear-gradient(180deg, #1a1f2e 0%, #0f1419 100%);
+  border-right: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 4px 0 24px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  z-index: 1000;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.SideNav::-webkit-scrollbar {
+  width: 6px;
+}
+
+.SideNav::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.SideNav::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+.SideNav::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+.content {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 24px 16px;
+  gap: 32px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.logo span {
+  font-size: 24px;
+  font-weight: 700;
+  color: #ffffff;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  background: linear-gradient(135deg, #eaa666 0%, #a2754b 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.menu {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+
+.ButtonMenu {
+  width: 100%;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+}
+
+.ButtonMenu::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 3px;
+  background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  border-radius: 0 3px 3px 0;
+  z-index: 1;
+}
+
+.ButtonMenu:hover::before,
+a.ButtonMenu:hover::before {
+  opacity: 1;
+}
+
+.ButtonMenu:hover,
+a.ButtonMenu:hover {
+  transform: translateX(4px);
+}
+
+.ButtonMenu:active,
+a.ButtonMenu:active {
+  transform: translateX(2px);
+}
+
+/* Button styling within menu */
+.ButtonMenu button,
+.ButtonMenu a,
+a.ButtonMenu {
+  width: 100%;
+  padding: 14px 20px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  color: #e0e6ed;
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  text-align: left;
+  position: relative;
+  overflow: hidden;
+  backdrop-filter: blur(10px);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  box-sizing: border-box;
+}
+
+/* Icon styling */
+.ButtonMenu button .icon,
+.ButtonMenu a .icon,
+a.ButtonMenu .icon {
+  font-size: 20px;
+  min-width: 20px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  color: inherit;
+}
+
+.ButtonMenu button::before,
+.ButtonMenu a::before,
+a.ButtonMenu::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+  transition: left 0.5s ease;
+}
+
+.ButtonMenu button:hover,
+.ButtonMenu a:hover,
+a.ButtonMenu:hover {
+  background: rgba(102, 126, 234, 0.15);
+  border-color: rgba(102, 126, 234, 0.3);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+  transform: translateY(-1px);
+}
+
+.ButtonMenu button:hover .icon,
+.ButtonMenu a:hover .icon,
+a.ButtonMenu:hover .icon {
+  transform: scale(1.1);
+}
+
+.ButtonMenu button:hover::before,
+.ButtonMenu a:hover::before,
+a.ButtonMenu:hover::before {
+  left: 100%;
+}
+
+.ButtonMenu button:active,
+.ButtonMenu a:active,
+a.ButtonMenu:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.15);
+}
+
+.ButtonMenu button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.ButtonMenu button:focus,
+.ButtonMenu a:focus,
+a.ButtonMenu:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+}
+
+/* Active state for menu buttons */
+.ButtonMenu.active button,
+.ButtonMenu.active a,
+a.ButtonMenu.active {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.2) 0%, rgba(118, 75, 162, 0.2) 100%);
+  border-color: rgba(102, 126, 234, 0.4);
+  color: #ffffff;
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.25);
+}
+
+.ButtonMenu.active::before,
+a.ButtonMenu.active::before {
+  opacity: 1;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .SideNav {
+    width: 240px;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+  }
+
+  .SideNav.open {
+    transform: translateX(0);
+  }
+}
+
+@media (max-width: 480px) {
+  .SideNav {
+    width: 100%;
+    max-width: 280px;
+  }
+
+  .content {
+    padding: 20px 12px;
+    gap: 24px;
+  }
+
+  .logo {
+    padding: 12px;
+  }
+
+  .logo span {
+    font-size: 20px;
+  }
+
+  .ButtonMenu button,
+  .ButtonMenu a,
+  a.ButtonMenu {
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+}
+
+/* Dark theme enhancements */
+@media (prefers-color-scheme: light) {
+  .SideNav {
+    background: linear-gradient(180deg, #ffffff 0%, #f5f7fa 100%);
+    border-right: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.1);
+  }
+
+  .logo {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  }
+
+  .SideNav::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.02);
+  }
+
+  .SideNav::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.1);
+  }
+
+  .SideNav::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.15);
+  }
+
+  .ButtonMenu button,
+  .ButtonMenu a,
+  a.ButtonMenu {
+    background: rgba(0, 0, 0, 0.03);
+    border-color: rgba(0, 0, 0, 0.08);
+    color: #2d3748;
+  }
+
+  .ButtonMenu button:hover,
+  .ButtonMenu a:hover,
+  a.ButtonMenu:hover {
+    background: rgba(102, 126, 234, 0.1);
+    border-color: rgba(102, 126, 234, 0.25);
+    color: #1a202c;
+  }
+
+  .ButtonMenu.active button,
+  .ButtonMenu.active a,
+  a.ButtonMenu.active {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(118, 75, 162, 0.15) 100%);
+    border-color: rgba(102, 126, 234, 0.3);
+    color: #1a202c;
+  }
+}
+

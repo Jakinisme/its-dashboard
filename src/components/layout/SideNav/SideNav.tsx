@@ -1,0 +1,51 @@
+import { NavLink } from "react-router-dom";
+import Button from "../../ui/Button";
+import styles from "./SideNav.module.css";
+import { MdDashboard, MdHistory, MdSettings, MdLogout } from "react-icons/md";
+
+const SideNav = () => {
+    const menuItems = [
+        { path: "/", icon: <MdDashboard className={styles.icon} />, label: "Dashboard" },
+        { path: "/history", icon: <MdHistory className={styles.icon} />, label: "History" },
+        { path: "/settings", icon: <MdSettings className={styles.icon} />, label: "Settings" },
+    ];
+
+    const handleLogout = () => {
+        localStorage.removeItem("token");
+        window.location.href = "/login";
+    };
+
+    return (
+        <nav className={styles.SideNav}>
+            <div className={styles.content}>
+                <div className={styles.logo}>
+                    <span>Astrajingga</span>
+                </div>
+
+                <div className={styles.menu}>
+                    {menuItems.map((item) => (
+                        <NavLink 
+                            key={item.path} 
+                            to={item.path} 
+                            end={item.path === "/"}
+                            className={({ isActive }) => 
+                                `${styles.ButtonMenu} ${isActive ? styles.active : ""}`
+                            }
+                        >
+                            {item.icon}
+                            {item.label}
+                        </NavLink>
+                    ))}
+                    <div className={styles.ButtonMenu}>
+                        <Button onClick={handleLogout}>
+                            <MdLogout className={styles.icon} />
+                            Logout
+                        </Button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+    );
+};
+
+export default SideNav;

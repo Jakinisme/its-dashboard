@@ -1,0 +1,13 @@
+.Dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+}
+
+.Gauges,
+.Graph {
+  width: 100%;
+  box-sizing: border-box;
+}
+
