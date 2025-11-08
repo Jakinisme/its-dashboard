@@ -8,25 +8,25 @@ import styles from "./Dashboard.module.css";
 const Dashboard = () => {
     const gaugeData: GaugeData[] = [
         {
-            name: "tes1",
+            name: "Kelembapan Tanah",
             value: 50,
             maxValue: 100,
             color: "#8884d8"
         },
         {
-            name: "tes2",
+            name: "Kelembapan Udara",
             value: 60,
             maxValue: 100,
             color: "#82ca9d"
         },
         {
-            name: "tes3",
+            name: "Suhu",
             value: 45,
             maxValue: 100,
             color: "#ffc658"
         },
         {
-            name: "tes4",
+            name: "Intensitas Cahaya",
             value: 85,
             maxValue: 100,
             color: "#ff7300"
