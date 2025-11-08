@@ -7,25 +7,25 @@ import styles from "./Dashboard.module.css";
 const Dashboard = () => {
     const gaugeData: GaugeData[] = [
         {
-            name: "CPU Usage",
+            name: "tes1",
             value: 75,
             maxValue: 100,
             color: "#8884d8"
         },
         {
-            name: "Memory",
+            name: "tes2",
             value: 60,
             maxValue: 100,
             color: "#82ca9d"
         },
         {
-            name: "Disk Space",
+            name: "tes3",
             value: 45,
             maxValue: 100,
             color: "#ffc658"
         },
         {
-            name: "Network",
+            name: "tes4",
             value: 85,
             maxValue: 100,
             color: "#ff7300"
