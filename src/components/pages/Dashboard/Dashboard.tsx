@@ -8,7 +8,7 @@ const Dashboard = () => {
     const gaugeData: GaugeData[] = [
         {
             name: "tes1",
-            value: 75,
+            value: 50,
             maxValue: 100,
             color: "#8884d8"
         },
