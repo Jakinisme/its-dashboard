@@ -59,6 +59,7 @@ const Dashboard = () => {
     ]
 
     return (
+        <main>
         <div className={styles.Dashboard}>
             {content.map((contentItem, index) => (
                 <div key={index} className={contentItem.className}>
@@ -66,6 +67,7 @@ const Dashboard = () => {
                 </div>
             ))}
         </div>
+        </main>
     );
 };
 
