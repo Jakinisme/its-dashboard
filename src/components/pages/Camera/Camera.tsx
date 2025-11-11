@@ -7,7 +7,7 @@ const Camera = () => {
                 <div className={styles.content}>
                 <h1 className={styles.title}>Camera</h1>
                  <video
-                   src="http://localhost:8083/stream/6fa553ca-e7fd-4061-96cf-492ef9b985c4/channel/0/hls/live/index.m3u8"
+                   src="http://localhost:8083/stream/afe4036f-e7fa-431d-aaf6-ed707f08c722/channel/0/hlsll/live/index.m3u8"
                    controls
                    autoPlay
                    muted
