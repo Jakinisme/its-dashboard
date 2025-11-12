@@ -2,14 +2,13 @@ import { NavLink } from "react-router-dom";
 import Button from "../../ui/Button";
 import Profile from "../../ui/Profile/Profile";
 import styles from "./SideNav.module.css";
-import { MdDashboard, MdHistory, MdSettings, MdLogout, MdCamera } from "react-icons/md";
+import { MdDashboard, MdHistory, MdLogout, MdCamera } from "react-icons/md";
 
 const SideNav = () => {
     const menuItems = [
         { path: "/", icon: <MdDashboard className={styles.icon} />, label: "Dashboard" },
         { path: '/camera', icon: <MdCamera className={styles.icon} />, label: "Live Cam" },
         { path: "/history", icon: <MdHistory className={styles.icon} />, label: "History" },
-        { path: "/settings", icon: <MdSettings className={styles.icon} />, label: "Settings" },
     ];
 
     const handleLogout = () => {

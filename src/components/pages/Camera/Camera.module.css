@@ -1,3 +1,36 @@
-.content {
-    color: #ffff;
+.main {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
 }
+
+.container {
+  width: 85%;
+  color: #fff;
+}
+
+.title {
+  text-align: center;
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+}
+
+.videoCropper {
+  width: 100%;
+  height: 700px;
+  overflow: hidden;
+  border-radius: 12px;
+  position: relative;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+.videoFrame {
+  width: 213%; 
+  height: 100%;
+  border: none;
+  position: absolute;
+  top: 0;
+  left: -35%;
+}
+

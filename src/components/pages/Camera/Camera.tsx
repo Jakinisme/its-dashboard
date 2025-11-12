@@ -1,23 +1,22 @@
+
 import styles from "./Camera.module.css";
 
 const Camera = () => {
     return (
-        <main>
+        
+        <main className={styles.main}>
             <div className={styles.container}>
-                <div className={styles.content}>
-                <h1 className={styles.title}>Camera</h1>
-                 <video
-                   src="http://localhost:8083/stream/afe4036f-e7fa-431d-aaf6-ed707f08c722/channel/0/hlsll/live/index.m3u8"
-                   controls
-                   autoPlay
-                   muted
-                   style={{ width: "80%", borderRadius: "12px" }}
-                 />
+                <h1 className={styles.title}>Live Cam</h1>
+                <div className={styles.videoCropper}>
+                    <iframe
+                        src="http://localhost:8083/pages/player/mse/camera1/0"
+                        className={styles.videoFrame}
+                        allowFullScreen
+                    />
                 </div>
             </div>
         </main>
-         
-    )
-}
+    );
+};
 
-export default Camera   
+export default Camera;

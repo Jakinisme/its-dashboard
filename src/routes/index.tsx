@@ -2,7 +2,6 @@ import { createBrowserRouter } from "react-router-dom";
 import Layout from "../components/layout/Layout";
 import Dashboard from "../components/pages/Dashboard/Dashboard";
 import History from "../components/pages/History/History";
-import Settings from "../components/pages/Settings/Settings";
 import Camera from "../components/pages/Camera";
 
 export const router = createBrowserRouter([
@@ -23,13 +22,10 @@ export const router = createBrowserRouter([
         path: "history",
         element: <History />,
       },
-      {
-        path: "settings",
-        element: <Settings />,
-      },
     ],
   },
 ]);
+
 
 
 
