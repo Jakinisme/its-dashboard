@@ -1,0 +1,211 @@
+.main {
+    min-height: 100vh;
+    background: #f5f7fb00;
+    padding: 3rem 0;
+}
+
+.container {
+    width: min(960px, 92%);
+    margin: 0 auto;
+}
+
+.card {
+    background: #0d0e16;
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
+    padding: 2.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2.5rem;
+}
+
+.profileHeader {
+    display: flex;
+    gap: 2rem;
+    align-items: flex-start;
+    flex-wrap: wrap;
+}
+
+.pictureWrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    min-width: 160px;
+}
+
+.avatar {
+    width: 160px;
+    height: 160px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid #eef2ff;
+    background: #f1f5f9;
+    box-shadow: inset 0 0 0 1px rgba(148, 163, 184, 0.2);
+}
+
+.fileInput {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+}
+
+.changePictureButton {
+    padding: 0.65rem 1.5rem;
+    border-radius: 999px;
+    background: #2563eb;
+    color: #ffffff;
+    font-weight: 600;
+    border: none;
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.changePictureButton:disabled {
+    background: #cbd5f5;
+    cursor: not-allowed;
+}
+
+.changePictureButton:hover:not(:disabled) {
+    background: #1d4ed8;
+    transform: translateY(-1px);
+}
+
+.profileDetails {
+    flex: 1;
+    min-width: 240px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.name {
+    font-size: clamp(2rem, 2.5vw, 2.5rem);
+    color: #0f172a;
+    margin: 0;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+.email {
+    margin: 0;
+    color: #475569;
+    font-size: 1rem;
+}
+
+.helperText {
+    margin: 0;
+    color: #64748b;
+    font-size: 0.95rem;
+}
+
+.editForm {
+    display: flex;
+    flex-direction: column;
+    gap: 1.75rem;
+}
+
+.inputGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.label {
+    font-weight: 600;
+    color: #1f2937;
+    font-size: 0.95rem;
+}
+
+.input {
+    padding: 0.85rem 1rem;
+    border-radius: 12px;
+    border: 1px solid #d1d5db;
+    font-size: 1rem;
+    transition: border 0.2s ease, box-shadow 0.2s ease;
+    background: #f8fafc;
+    color: #0f172a;
+}
+
+.input::placeholder {
+    color: #94a3b8;
+}
+
+.input:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+    outline: none;
+    background: #ffffff;
+}
+
+.buttonGroup,
+.actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.primaryButton {
+    background: #2563eb;
+    color: #ffffff;
+    border: none;
+    padding: 0.85rem 1.8rem;
+    border-radius: 12px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.primaryButton:hover:not(:disabled) {
+    background: #1d4ed8;
+    transform: translateY(-1px);
+    box-shadow: 0 12px 20px rgba(37, 99, 235, 0.22);
+}
+
+.primaryButton:disabled {
+    background: #93c5fd;
+    cursor: not-allowed;
+}
+
+.ghostButton {
+    background: #f8fafc;
+    color: #1e293b;
+    border: 1px solid #d7dce5;
+    padding: 0.85rem 1.8rem;
+    border-radius: 12px;
+    font-weight: 600;
+    transition: border 0.2s ease, color 0.2s ease, transform 0.2s ease;
+}
+
+.ghostButton:hover {
+    border-color: #2563eb;
+    color: #2563eb;
+    transform: translateY(-1px);
+}
+
+@media (max-width: 768px) {
+    .card {
+        padding: 2rem;
+        gap: 2rem;
+    }
+
+    .profileHeader {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+
+    .profileDetails {
+        align-items: center;
+    }
+
+    .buttonGroup,
+    .actions {
+        justify-content: center;
+    }
+}
+

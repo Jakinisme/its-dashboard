@@ -5,20 +5,26 @@
 }
 
 .content {
+  border: none;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  background: rgba(255, 255, 255, 0.03);
   display: grid;
   grid-template-columns: auto 1fr;
   grid-template-rows: auto auto;
   align-items: center;
   gap: 12px 12px;
   padding: 12px;
-  background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 12px;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
+  outline: none;
 }
 
-.content:hover {
+.content:hover,
+.content:focus-visible {
   background: rgba(102, 126, 234, 0.1);
   border-color: rgba(102, 126, 234, 0.2);
   transform: translateY(-1px);
@@ -122,7 +128,8 @@
     border-color: rgba(0, 0, 0, 0.08);
   }
 
-  .content:hover {
+  .content:hover,
+  .content:focus-visible {
     background: rgba(102, 126, 234, 0.1);
     border-color: rgba(102, 126, 234, 0.25);
   }
