@@ -1,74 +1,37 @@
 import Gauges from "../../ui/Gauges";
 import Graph from "../../ui/Graph";
-import type { GaugeData, GraphData } from "../../../types/charts";
+import { useCurrent } from "../../../hooks/useCurrent";
 
-import '../../../styles/global.css';
+import "../../../styles/global.css";
 import styles from "./Dashboard.module.css";
 
 const Dashboard = () => {
-    const gaugeData: GaugeData[] = [
-        {
-            name: "Soil Moisture",
-            value: 50,
-            maxValue: 100,
-            color: "#8884d8"
-        },
-        {
-            name: "Air Humidity",
-            value: 60,
-            maxValue: 100,
-            color: "#82ca9d"
-        },
-        {
-            name: "Temperature",
-            value: 45,
-            maxValue: 100,
-            color: "#ffc658"
-        },
-        {
-            name: "Light Intensity",
-            value: 85,
-            maxValue: 100,
-            color: "#ff7300"
-        }
-    ];
+  const {
+    gauges,
+    graph,
+    loading,
+    error,
+  } = useCurrent();
 
-    const graphData: GraphData = {
-        data: [
-            { name: "Jan", tes1: 4000, tes2: 2400, tes3: 2000 },
-            { name: "Feb", tes1: 3000, tes2: 1398, tes3: 1800 },
-            { name: "Mar", tes1: 2000, tes2: 9800, tes3: 2200 },
-            { name: "Apr", tes1: 2780, tes2: 3908, tes3: 2500 },
-            { name: "May", tes1: 1890, tes2: 4800, tes3: 2100 },
-            { name: "Jun", tes1: 2390, tes2: 3800, tes3: 2300 },
-            { name: "Jul", tes1: 3490, tes2: 4300, tes3: 2400 },
-        ],
-        dataKeys: ["tes1", "tes2", "tes3"],
-        colors: ["#8884d8", "#82ca9d", "#ffc658"]
-    };
+  const isReady = !loading && !error;
 
-    const content = [
-        {
-            item: <Gauges data={gaugeData} title="" />, 
-            className: styles.Gauges
-        },
-        {
-            item: <Graph data={graphData} title="Grafik Realtime" type="area" />,
-            className: styles.Graph
-        }
-    ]
-
-    return (
-        <main>
-        <div className={styles.Dashboard}>
-            {content.map((contentItem, index) => (
-                <div key={index} className={contentItem.className}>
-                    {contentItem.item}
-                </div>
-            ))}
+  return (
+    <main>
+      <div className={styles.Dashboard}>
+        <div className={styles.Gauges}>
+          {loading && <p>Loading current metrics</p>}
+          {isReady && <Gauges data={gauges} title="Current Metrics" />}
         </div>
-        </main>
-    );
+        <div className={styles.Graph}>
+          {loading && <p>Loading graph</p>}
+          {isReady && graph.data.length > 0 && (
+            <Graph data={graph} title="Realtime Graph" type="area" />
+          )}
+          {isReady && graph.data.length === 0 && <p>No data available.</p>}
+        </div>
+      </div>
+    </main>
+  );
 };
 
 export default Dashboard;

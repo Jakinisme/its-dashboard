@@ -6,7 +6,8 @@ export interface GaugeData {
 }
 
 export interface GraphDataPoint {
-  name: string;
+  timestamp: number;
+  label: string;
   [key: string]: string | number;
 }
 
@@ -15,6 +16,7 @@ export interface GraphData {
   dataKeys: string[];
   colors?: string[];
 }
+
 
 
 
