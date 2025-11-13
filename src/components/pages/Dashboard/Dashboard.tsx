@@ -49,11 +49,11 @@ const Dashboard = () => {
 
     const content = [
         {
-            item: <Gauges data={gaugeData} title="Gauges" />, 
+            item: <Gauges data={gaugeData} title="" />, 
             className: styles.Gauges
         },
         {
-            item: <Graph data={graphData} title="Graph" type="area" />,
+            item: <Graph data={graphData} title="Grafik Realtime" type="area" />,
             className: styles.Graph
         }
     ]
