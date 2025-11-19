@@ -8,7 +8,7 @@ import {
 } from "react";
 import { onAuthStateChanged, signOut, type User } from "firebase/auth";
 
-import { auth } from "../services/Firebase";
+import { auth, authReady } from "../services/Firebase";
 
 interface AuthContextValue {
   user: User | null;
@@ -23,13 +23,29 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (nextUser) => {
-      setUser(nextUser);
-      setLoading(false);
-    });
+    let unsubscribe: (() => void) | null = null;
+    let cancelled = false;
+
+    const initialize = async () => {
+      await authReady;
+
+      if (cancelled) {
+        return;
+      }
+
+      unsubscribe = onAuthStateChanged(auth, (nextUser) => {
+        setUser(nextUser);
+        setLoading(false);
+      });
+    };
+
+    initialize();
 
     return () => {
-      unsubscribe();
+      cancelled = true;
+      if (unsubscribe) {
+        unsubscribe();
+      }
     };
   }, []);
 
