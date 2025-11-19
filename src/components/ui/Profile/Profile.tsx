@@ -1,5 +1,5 @@
 import styles from "./Profile.module.css";
-import { useAuth } from "../../../contexts/AuthContext";
+import { useAuth } from "../../../hooks/useAuth";
 
 const Profile = () => {
   const { user } = useAuth();

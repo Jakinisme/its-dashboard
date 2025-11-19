@@ -4,7 +4,7 @@ import {
   signUpWithEmail,
   loginWithGoogle,
   loginWithGithub,
-} from "../../auth/login";
+} from "../../../auth/login";
 
 import googleIcon from "../../../assets/icons/google.svg";
 import githubIcon from "../../../assets/icons/github.svg";

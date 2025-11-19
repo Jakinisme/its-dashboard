@@ -4,7 +4,7 @@ import { MdDashboard, MdHistory, MdLogout, MdCamera } from "react-icons/md";
 import Button from "../../ui/Button";
 import Profile from "../../ui/Profile/Profile";
 import styles from "./SideNav.module.css";
-import { useAuth } from "../../../contexts/AuthContext";
+import { useAuth } from "../../../hooks/useAuth";
 
 const SideNav = () => {
   const { logout } = useAuth();

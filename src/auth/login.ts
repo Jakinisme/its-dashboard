@@ -3,7 +3,7 @@ import {
   signInWithPopup,
   createUserWithEmailAndPassword,
 } from "firebase/auth";
-import { auth, googleProvider, githubProvider } from "../../services/Firebase";
+import { auth, googleProvider, githubProvider } from "../services/Firebase";
 import { FirebaseError } from "firebase/app";
 
 export async function signUpWithEmail(email: string, password: string) {
