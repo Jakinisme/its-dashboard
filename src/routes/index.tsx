@@ -1,14 +1,20 @@
-import { createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter, Navigate } from "react-router-dom";
 import Layout from "../components/layout/Layout";
 import Dashboard from "../components/pages/Dashboard/Dashboard";
 import History from "../components/pages/History/History";
 import Camera from "../components/pages/Camera";
 import Login from "../components/pages/Login";
+import Register from "../components/pages/Register";
+import { ProtectedRoute, PublicRoute } from "../components/auth/RouteGuards";
 
 export const router = createBrowserRouter([
   {
     path: "/",
-    element: <Layout />,
+    element: (
+      <ProtectedRoute>
+        <Layout />
+      </ProtectedRoute>
+    ),
     errorElement: <h1>404 Unauthorized</h1>,
     children: [
       {
@@ -23,11 +29,27 @@ export const router = createBrowserRouter([
         path: "history",
         element: <History />,
       },
-      {
-        path: "login",
-        element: <Login />,
-      }
     ],
+  },
+  {
+    path: "/login",
+    element: (
+      <PublicRoute>
+        <Login />
+      </PublicRoute>
+    ),
+  },
+  {
+    path: "/register",
+    element: (
+      <PublicRoute>
+        <Register />
+      </PublicRoute>
+    ),
+  },
+  {
+    path: "*",
+    element: <Navigate to="/register" replace />,
   },
 ]);
 

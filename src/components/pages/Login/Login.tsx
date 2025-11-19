@@ -1,11 +1,16 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import {
   loginWithEmail,
   loginWithGoogle,
   loginWithGithub,
 } from "../../auth/login";
 
+import googleIcon from "../../../assets/icons/google.svg";
+import githubIcon from "../../../assets/icons/github.svg";
+
 import Button from "../../ui/Button";
+import styles from "./Login.module.css";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -14,6 +19,7 @@ export default function Login() {
 
   const handleEmailLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setError("");
     try {
       await loginWithEmail(email, password);
       console.log("Login success");
@@ -23,6 +29,7 @@ export default function Login() {
   };
 
   const handleGoogle = async () => {
+    setError("");
     try {
       await loginWithGoogle();
     } catch (msg) {
@@ -31,6 +38,7 @@ export default function Login() {
   };
 
   const handleGithub = async () => {
+    setError("");
     try {
       await loginWithGithub();
     } catch (msg) {
@@ -39,31 +47,74 @@ export default function Login() {
   };
 
   return (
-    <div>
-      <h2>Button</h2>
+    <section className={styles.page}>
+      <div className={styles.card}>
+        <h2 className={styles.title}>Welcome back</h2>
+        <p className={styles.subtitle}>
+          Sign in to access moisture insights and keep your crops on track.
+        </p>
 
-      <form onSubmit={handleEmailLogin}>
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
+        <form className={styles.form} onSubmit={handleEmailLogin}>
+          <label className={styles.inputGroup}>
+            <span className={styles.label}>Email</span>
+            <input
+              className={styles.input}
+              type="email"
+              placeholder="you@email.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+            />
+          </label>
 
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+          <label className={styles.inputGroup}>
+            <span className={styles.label}>Password</span>
+            <input
+              className={styles.input}
+              type="password"
+              placeholder="Your password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              minLength={6}
+            />
+          </label>
 
-        <Button type="submit">Login with Email</Button>
-      </form>
+          <div className={styles.actions}>
+            <Button className={styles.primaryButton} type="submit">
+              Login with Email
+            </Button>
+          </div>
+        </form>
 
-      <button onClick={handleGoogle}>Login with Google</button>
-      <button onClick={handleGithub}>Login In with GitHub</button>
+        <div className={styles.providers}>
+          <Button
+            className={styles.providerButton}
+            type="button"
+            onClick={handleGoogle}
+          >
+            Continue with <img className={styles.icon} src={googleIcon} alt="google" />
+          </Button>
+          <Button
+            className={styles.providerButton}
+            type="button"
+            onClick={handleGithub}
+          >
+            Continue with <img className={styles.icon} src={githubIcon} alt="github" />
+          </Button>
+        </div>
 
-      {error && <p style={{ color: "red" }}>{error}</p>}
-    </div>
+        <p className={styles.error} aria-live="polite">
+          {error}
+        </p>
+
+        <p className={styles.secondaryAction}>
+          New to Dashboard?
+          <Link className={styles.link} to="/register">
+            Create an account
+          </Link>
+        </p>
+      </div>
+    </section>
   );
 }
