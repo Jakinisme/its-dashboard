@@ -3,6 +3,7 @@ import Layout from "../components/layout/Layout";
 import Dashboard from "../components/pages/Dashboard/Dashboard";
 import History from "../components/pages/History/History";
 import Camera from "../components/pages/Camera";
+import Login from "../components/pages/Login";
 
 export const router = createBrowserRouter([
   {
@@ -22,6 +23,10 @@ export const router = createBrowserRouter([
         path: "history",
         element: <History />,
       },
+      {
+        path: "login",
+        element: <Login />,
+      }
     ],
   },
 ]);

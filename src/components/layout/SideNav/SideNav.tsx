@@ -2,7 +2,7 @@ import { NavLink } from "react-router-dom";
 import Button from "../../ui/Button";
 import Profile from "../../ui/Profile/Profile";
 import styles from "./SideNav.module.css";
-import { MdDashboard, MdHistory, MdLogout, MdCamera } from "react-icons/md";
+import { MdDashboard, MdHistory, MdLogin, MdCamera } from "react-icons/md";
 
 const SideNav = () => {
     const menuItems = [
@@ -11,8 +11,7 @@ const SideNav = () => {
         { path: "/history", icon: <MdHistory className={styles.icon} />, label: "History" },
     ];
 
-    const handleLogout = () => {
-        localStorage.removeItem("token");
+    const handleLogin = () => {
         window.location.href = "/login";
     };
 
@@ -38,9 +37,9 @@ const SideNav = () => {
                         </NavLink>
                     ))}
                     <div className={styles.ButtonMenu}>
-                        <Button onClick={handleLogout}>
-                            <MdLogout className={styles.icon} />
-                            Logout
+                        <Button onClick={handleLogin}>
+                            <MdLogin className={styles.icon} />
+                            Login
                         </Button>
                     </div>
                 </div>
