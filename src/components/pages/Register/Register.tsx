@@ -107,7 +107,7 @@ export default function Register() {
         </div>
 
         <p className={styles.error} aria-live="polite">
-          {error}
+          {error ? "An error occurred" : "\u00A0"}
         </p>
 
         <p className={styles.secondaryAction}>
