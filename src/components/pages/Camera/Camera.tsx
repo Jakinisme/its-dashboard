@@ -1,4 +1,4 @@
-
+import VideoFeed from "../../ui/VideoFeed";
 import styles from "./Camera.module.css";
 
 const Camera = () => {
@@ -30,11 +30,7 @@ const Camera = () => {
                     </div>
 
                     <div className={styles.streamFrame}>
-                        <iframe
-                            src="http://localhost:8083/pages/player/mse/camera1/0"
-                            title="Main entrance live stream"
-                            allowFullScreen
-                        />
+                        <VideoFeed />
                     </div>
 
                     <div className={styles.streamMeta}>
