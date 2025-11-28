@@ -93,7 +93,7 @@ export const useWebRTC = (
         });
 
         // WHEP negotiation
-        const url = `http://${metamtxHost}/${streamName}/whep`;
+        const url = `https://${metamtxHost}/${streamName}/whep`;
         const res = await fetch(url, {
           method: "POST",
           headers: { "Content-Type": "application/sdp" },
