@@ -48,7 +48,7 @@ export const useDetection = (options: UseDetectionOptions = {}) => {
       try {
         const msg = JSON.parse(ev.data);
         
-        console.log("[useDetection] Received:", msg.type);
+        //console.log("[useDetection] Received:", msg.type);
 
         if (msg.type === "wide_batch" && msg.detections) {
           detectionsRef.current = msg.detections
@@ -69,7 +69,7 @@ export const useDetection = (options: UseDetectionOptions = {}) => {
               };
             });
           
-          console.log(`[useDetection] Updated ${detectionsRef.current.length} detections`);
+          //console.log(`[useDetection] Updated ${detectionsRef.current.length} detections`);
         }
         
         else if (msg.type === "classify" && msg.plant_id !== undefined) {
@@ -81,7 +81,7 @@ export const useDetection = (options: UseDetectionOptions = {}) => {
           const det = detectionsRef.current.find(d => d.plant_id === plantId);
           if (det) {
             det.health = newHealth;
-            console.log(`[useDetection] Plant ${plantId} health: ${newHealth}`);
+            //console.log(`[useDetection] Plant ${plantId} health: ${newHealth}`);
           }
         }
       } catch (err) {
