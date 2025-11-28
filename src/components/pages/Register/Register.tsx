@@ -12,7 +12,7 @@ import githubIcon from "../../../assets/icons/github.svg";
 import Button from "../../ui/Button";
 import styles from "./Register.module.css";
 
-export default function Register() {
+const Register = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -120,3 +120,5 @@ export default function Register() {
     </section>
   );
 }
+
+export default Register;
