@@ -1,5 +1,5 @@
-// hooks/useDetection.ts
-import { useEffect, useRef } from "react";
+
+import { useEffect, useRef, useCallback } from "react";
 
 export interface Detection {
   x1: number;
@@ -10,6 +10,7 @@ export interface Detection {
   conf: number;
   plant_id?: number;
   health?: string;
+  timestamp?: number;
 }
 
 interface DetectionMessage {
@@ -24,17 +25,37 @@ interface DetectionMessage {
 interface UseDetectionOptions {
   wsUrl?: string;
   maxDetections?: number;
+  detectionTimeout?: number;
 }
 
 export const useDetection = (options: UseDetectionOptions = {}) => {
   const { 
     wsUrl = "ws://localhost:9001", 
-    maxDetections = 9 
+    maxDetections = 9,
+    detectionTimeout = 1000 
   } = options;
 
   const detectionsRef = useRef<Detection[]>([]);
   const healthStatusRef = useRef<Map<number, string>>(new Map());
   const wsRef = useRef<WebSocket | null>(null);
+  const lastUpdateTimeRef = useRef<number>(Date.now());
+  const timeoutRef = useRef<number | null>(null);
+
+  const scheduleDetectionCleanup = useCallback(() => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+
+    timeoutRef.current = window.setTimeout(() => {
+      const now = Date.now();
+      const elapsed = now - lastUpdateTimeRef.current;
+      
+      if (elapsed >= detectionTimeout) {
+        console.log("[useDetection] Auto-clearing stale detections");
+        detectionsRef.current = [];
+      }
+    }, detectionTimeout);
+  }, [detectionTimeout]);
 
   useEffect(() => {
     const ws = new WebSocket(wsUrl);
@@ -47,10 +68,30 @@ export const useDetection = (options: UseDetectionOptions = {}) => {
     ws.onmessage = (ev) => {
       try {
         const msg = JSON.parse(ev.data);
+        const now = Date.now();
         
-        //console.log("[useDetection] Received:", msg.type);
+        if (msg.type === "wide_batch") {
+          lastUpdateTimeRef.current = now;
+          
+          if (!msg.detections || msg.detections.length === 0) {
+            console.log("[useDetection] No detections - clearing");
+            detectionsRef.current = [];
+            scheduleDetectionCleanup();
+            return;
+          }
 
-        if (msg.type === "wide_batch" && msg.detections) {
+          const currentPlantIds = new Set(
+            msg.detections.map((d: DetectionMessage) => d.plant_id).filter(Boolean)
+          );
+
+          const healthKeys = Array.from(healthStatusRef.current.keys());
+          for (const plantId of healthKeys) {
+            if (!currentPlantIds.has(plantId)) {
+              //console.log(`[useDetection] Plant ${plantId} disappeared, removing health status`);
+              healthStatusRef.current.delete(plantId);
+            }
+          }
+
           detectionsRef.current = msg.detections
             .slice(0, maxDetections)
             .map((d: DetectionMessage) => {
@@ -66,10 +107,12 @@ export const useDetection = (options: UseDetectionOptions = {}) => {
                 conf: d.conf_det || d.conf || 0,
                 plant_id: plantId,
                 health: storedHealth || d.health || "unknown",
+                timestamp: now,
               };
             });
           
           //console.log(`[useDetection] Updated ${detectionsRef.current.length} detections`);
+          scheduleDetectionCleanup();
         }
         
         else if (msg.type === "classify" && msg.plant_id !== undefined) {
@@ -81,7 +124,10 @@ export const useDetection = (options: UseDetectionOptions = {}) => {
           const det = detectionsRef.current.find(d => d.plant_id === plantId);
           if (det) {
             det.health = newHealth;
-            //console.log(`[useDetection] Plant ${plantId} health: ${newHealth}`);
+            det.timestamp = now;
+           // console.log(`[useDetection] Plant ${plantId} health updated: ${newHealth}`);
+          } else {
+            console.warn(`[useDetection] Received health for unknown plant_id: ${plantId}`);
           }
         }
       } catch (err) {
@@ -94,18 +140,28 @@ export const useDetection = (options: UseDetectionOptions = {}) => {
     };
 
     ws.onclose = () => {
-      console.log("[useDetection] WebSocket disconnected");
+      //console.log("[useDetection] WebSocket disconnected");
+      detectionsRef.current = [];
+      healthStatusRef.current.clear();
     };
 
     return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
       ws.close();
       wsRef.current = null;
     };
-  }, [wsUrl, maxDetections]);
+  }, [wsUrl, maxDetections, detectionTimeout, scheduleDetectionCleanup]);
 
   const clearDetections = () => {
     detectionsRef.current = [];
     healthStatusRef.current.clear();
+    lastUpdateTimeRef.current = Date.now();
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+   // console.log("[useDetection] Manual clear");
   };
 
   return {

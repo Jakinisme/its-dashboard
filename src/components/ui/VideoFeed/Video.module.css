@@ -1,17 +1,70 @@
+/* Video.module.css */
+
 .container {
-    position: relative;
-    width: 100%;
-    padding-bottom: 56.25%;
-    overflow: hidden;
-    background-color: #000;
+  position: relative;
+  width: 100%;
+  max-width: 1920px; /* ✅ Updated: Match new camera resolution */
+  margin: 0 auto;
+  background: #000;
+  
+  /* ✅ Maintain 16:9 aspect ratio for both 1920x1080 and 1280x720 */
+  aspect-ratio: 16 / 9;
+  
+  /* Prevent overflow */
+  overflow: hidden;
 }
 
-.video, .canvas {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    pointer-events: none;
+.video {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  
+  /* ✅ CRITICAL: Preserve aspect ratio, no distortion */
+  object-fit: contain;
+  
+  /* Remove default browser styles */
+  border: none;
+  outline: none;
+}
+
+.canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  
+  /* ✅ Match video's object-fit */
+  object-fit: contain;
+  
+  /* Canvas sits on top of video */
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* Optional: Add loading state */
+.container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+  z-index: -1;
+}
+
+/* Responsive breakpoints */
+@media (max-width: 1920px) {
+  .container {
+    max-width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    max-width: 100vw;
+  }
 }

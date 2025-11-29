@@ -1,4 +1,3 @@
-
 import { useEffect, useRef, useCallback } from "react";
 import type { Detection } from "./useDetection";
 
@@ -50,10 +49,13 @@ export const useCanvas = (options: UseCanvasRendererOptions) => {
       animationFrameRef.current = requestAnimationFrame(drawCanvas);
       return;
     }
+    const videoWidth = video.videoWidth;
+    const videoHeight = video.videoHeight;
 
-    if (canvas.width !== video.videoWidth || canvas.height !== video.videoHeight) {
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
+    if (canvas.width !== videoWidth || canvas.height !== videoHeight) {
+      canvas.width = videoWidth;
+      canvas.height = videoHeight;
+     // console.log(`[useCanvas] Canvas resized to ${videoWidth}x${videoHeight}`);
     }
 
     const ctx = canvas.getContext("2d");
@@ -64,25 +66,63 @@ export const useCanvas = (options: UseCanvasRendererOptions) => {
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    if (detectionsRef.current) {
+    const displayWidth = video.clientWidth;
+    const displayHeight = canvas.clientHeight;
+    
+    const scaleX = canvas.width / displayWidth;
+    const scaleY = canvas.height / displayHeight;
+
+    if (detectionsRef.current && detectionsRef.current.length > 0) {
+      const firstRender = !animationFrameRef.current;
+      if (firstRender) {
+        console.log(`[useCanvas] Display: ${displayWidth}x${displayHeight}, Internal: ${canvas.width}x${canvas.height}`);
+        console.log(`[useCanvas] Scale factors: X=${scaleX.toFixed(2)}, Y=${scaleY.toFixed(2)}`);
+      }
+    }
+
+    if (detectionsRef.current && detectionsRef.current.length > 0) {
       detectionsRef.current.forEach((det) => {
-        const { x1, y1, x2, y2, cls, conf, health } = det;
+        let { x1, y1, x2, y2 } = det;
+        const { cls, conf, health } = det;
+
+        x1 = Math.max(0, Math.min(x1, canvas.width));
+        y1 = Math.max(0, Math.min(y1, canvas.height));
+        x2 = Math.max(0, Math.min(x2, canvas.width));
+        y2 = Math.max(0, Math.min(y2, canvas.height));
+
+        const boxWidth = x2 - x1;
+        const boxHeight = y2 - y1;
+
+        //if (boxWidth <= 0 || boxHeight <= 0) {
+        //  console.warn(`[useCanvas] Skip invalid box ${idx}: (${x1},${y1})-(${x2},${y2})`);
+        //  return;
+        //}
+
         const colors = getHealthColor(health);
 
         ctx.strokeStyle = colors.stroke;
         ctx.lineWidth = lineWidth;
-        ctx.strokeRect(x1, y1, x2 - x1, y2 - y1);
+        ctx.strokeRect(x1, y1, boxWidth, boxHeight);
 
         const healthLabel = showHealthLabel && health ? ` - ${health.toUpperCase()}` : "";
         const txt = `${cls} ${(conf * 100).toFixed(1)}%${healthLabel}`;
-        ctx.font = `${fontSize}px Arial`;
-        const tw = ctx.measureText(txt).width;
+        
+        ctx.font = `bold ${fontSize}px Arial`;
+        const textMetrics = ctx.measureText(txt);
+        const textWidth = textMetrics.width;
+        const textHeight = fontSize + 4; 
 
+        const labelY = y1 > textHeight + 5 ? y1 - textHeight - 2 : y1 + boxHeight + 2;
         ctx.fillStyle = colors.fill;
-        ctx.fillRect(x1, y1 - 20, tw + 10, 20);
+        ctx.fillRect(x1, labelY, textWidth + 10, textHeight);
 
         ctx.fillStyle = "white";
-        ctx.fillText(txt, x1 + 5, y1 - 5);
+        ctx.textBaseline = "top";
+        ctx.fillText(txt, x1 + 5, labelY + 2);
+
+       // if (idx === 0 && !animationFrameRef.current) {
+          //console.log(`[useCanvas] Drawing detection: cls=${cls}, bbox=(${x1.toFixed(0)},${y1.toFixed(0)})-(${x2.toFixed(0)},${y2.toFixed(0)}), size=${boxWidth.toFixed(0)}x${boxHeight.toFixed(0)}`);
+        //}
       });
     }
 
@@ -90,11 +130,13 @@ export const useCanvas = (options: UseCanvasRendererOptions) => {
   }, [canvasRef, videoRef, detectionsRef, lineWidth, fontSize, showHealthLabel]);
 
   useEffect(() => {
+    //console.log("[useCanvas] Starting render loop");
     animationFrameRef.current = requestAnimationFrame(drawCanvas);
 
     return () => {
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
+        //console.log("[useCanvas] Stopped render loop");
       }
     };
   }, [drawCanvas]);
