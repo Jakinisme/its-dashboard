@@ -1,5 +1,6 @@
-// hooks/useWebRTC.ts
+
 import { useEffect, useRef } from "react";
+import { useLive } from "./useLive";
 
 interface UseWebRTCOptions {
   metamtxHost?: string;
@@ -13,6 +14,8 @@ export const useWebRTC = (
   videoRef: React.RefObject<HTMLVideoElement | null>,
   options: UseWebRTCOptions = {}
 ) => {
+  const {setIsLive} = useLive();
+
   const {
     metamtxHost = "localhost:8889",
     streamName = "camera",
@@ -65,9 +68,11 @@ export const useWebRTC = (
 
           if (state === "connected") {
             console.log("[useWebRTC] WebRTC connected");
+            setIsLive(true);
             onConnected?.();
           } else if (state === "disconnected" || state === "failed") {
             console.log("[useWebRTC] WebRTC disconnected/failed");
+            setIsLive(false);
             onDisconnected?.();
           }
         };
@@ -121,7 +126,7 @@ export const useWebRTC = (
       stopped = true;
       cleanupPC();
     };
-  }, [videoRef, metamtxHost, streamName, reconnectDelay, onConnected, onDisconnected]);
+  }, [videoRef, metamtxHost, streamName, reconnectDelay, onConnected, onDisconnected, setIsLive]);
 
   return {
     pcRef,

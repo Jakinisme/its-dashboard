@@ -1,32 +1,79 @@
 import VideoFeed from "../../ui/VideoFeed";
 import styles from "./Camera.module.css";
 
+import { useEffect, useState } from "react";
+import { useLive } from "../../../hooks/useLive";
+
+
 const Camera = () => {
+    const { isLive } = useLive();
+
+    const [counter, setCounter] = useState(1);
+    const [time, setTime] = useState("");
+    
+    useEffect(() => {
+      let interval: number | undefined;
+    
+      if (!isLive) {
+        interval = window.setInterval(() => {
+          setCounter((prev) => prev + 1);
+        }, 1000);
+      } else {
+        setCounter(0);
+        setTime("Just now");
+      }
+    
+      return () => {
+        if (interval) clearInterval(interval);
+      };
+    }, [isLive]);
+
+    useEffect(() => {
+      if (counter < 60 && counter >= 1) {
+        setTime(`Updated ${counter} second${counter === 1 ? "s" : ""} ago`);
+      } else if (counter < 3600 && counter >= 60) {
+        const min = Math.floor(counter / 60);
+        setTime(`Updated ${min} minute${min !== 1 ? "s" : ""} ago`);
+      } else if (counter < 86400 && counter >= 3600) {
+        const hr = Math.floor(counter / 3600);
+        setTime(`Updated ${hr} hour${hr !== 1 ? "s" : ""} ago`);
+      } else if (counter >= 86400) {
+        const day = Math.floor(counter / 86400);
+        setTime(`Updated ${day} day${day !== 1 ? "s" : ""} ago`);
+      }
+    }, [counter]);
+
+
     const metaContent = [
         { label: "Resolution", value: "1920 x 1080" },
         { label: "Bitrate", value: "4.2 Mbps" },
         { label: "FPS", value: "30" },
     ]
     const cameraStatus = [
-        { label: "Camera 01", location: "Vertical Garden", status: "Online" },
+        { label: "Camera 01", location: "Vertical Garden", status: `${isLive ? "Live" : "Offline"}` },
     ]
     const recentActivity = [
         { time: "14:05", activity: "Tanaman dalam keadaan sehat" },
         { time: "13:58", activity: "Tanaman memiliki indikasi penyakit" },
         { time: "13:25", activity: "Tanaman dalam keadaan sehat" },
     ]
+
+
+
+
+    
     return (
         <main className={styles.main}>
             <section className={styles.header}>
                 <h1 className={styles.title}>Live Monitoring</h1>
-                <p className={styles.timestamp}>Updated just now</p>
+                <p className={styles.timestamp}>{time}</p>
             </section>
 
             <section className={styles.layout}>
                 <div className={styles.primaryFeed}>
                     <div className={styles.streamHeader}>
                         <h2>Vertical Garden</h2>
-                        <span className={styles.badge}>Live</span>
+                        <span className={styles.badge}>{isLive ? "Live" : "Offline"}</span>
                     </div>
 
                     <div className={styles.streamFrame}>
