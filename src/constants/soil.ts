@@ -6,13 +6,6 @@ export const SOIL_METRIC_CONFIG = {
     max: 100,
     color: "#8884d8",
   },
-  humidity: {
-    label: "Air Humidity",
-    unit: "%",
-    min: 0,
-    max: 100,
-    color: "#82ca9d",
-  },
   temperature: {
     label: "Temperature",
     unit: "°C",

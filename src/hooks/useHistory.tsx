@@ -92,7 +92,6 @@ export const useHistory = (): UseHistoryResult => {
       timestamp: entry.timestamp,
       label: entry.label,
       moisture: entry.moisture,
-      humidity: entry.humidity,
       temperature: entry.temperature,
       light: entry.light,
     }));
