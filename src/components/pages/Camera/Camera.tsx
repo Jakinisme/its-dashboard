@@ -10,17 +10,43 @@ const Camera = () => {
 
     const [counter, setCounter] = useState(1);
     const [time, setTime] = useState("");
+    const storageKey = "liveOfflineStart";
     
     useEffect(() => {
       let interval: number | undefined;
+
+      const getElapsedSeconds = () => {
+        if (typeof window === "undefined") return null;
+        const stored = window.localStorage.getItem(storageKey);
+        if (!stored) return null;
+
+        const start = Number(stored);
+        if (!Number.isFinite(start)) return null;
+
+        const diff = Math.floor((Date.now() - start) / 1000);
+        return diff > 0 ? diff : 1;
+      };
     
       if (!isLive) {
+        const existingStart = typeof window !== "undefined" ? window.localStorage.getItem(storageKey) : null;
+        if (!existingStart && typeof window !== "undefined") {
+          window.localStorage.setItem(storageKey, `${Date.now()}`);
+        }
+
+        const elapsed = getElapsedSeconds();
+        if (elapsed !== null) {
+          setCounter(elapsed);
+        }
+
         interval = window.setInterval(() => {
           setCounter((prev) => prev + 1);
         }, 1000);
       } else {
         setCounter(0);
         setTime("Just now");
+        if (typeof window !== "undefined") {
+          window.localStorage.removeItem(storageKey);
+        }
       }
     
       return () => {
@@ -45,9 +71,9 @@ const Camera = () => {
 
 
     const metaContent = [
-        { label: "Resolution", value: "1920 x 1080" },
+        { label: "Resolution", value: "1280 x 720" },
         { label: "Bitrate", value: "4.2 Mbps" },
-        { label: "FPS", value: "30" },
+        { label: "FPS", value: "15" },
     ]
     const cameraStatus = [
         { label: "Camera 01", location: "Vertical Garden", status: `${isLive ? "Live" : "Offline"}` },
