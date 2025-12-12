@@ -126,7 +126,7 @@ const Graph = ({
           <YAxis />
           <Tooltip
             content={<CustomTooltip />}
-            labelFormatter={(value: any, tooltipPayload: string | any[]) => {
+            labelFormatter={(value: any, tooltipPayload) => {
               if (
                 tooltipPayload?.length &&
                 typeof tooltipPayload[0].payload.label === "string"

@@ -127,7 +127,7 @@ export const useDetection = (options: UseDetectionOptions = {}) => {
             det.timestamp = now;
            // console.log(`[useDetection] Plant ${plantId} health updated: ${newHealth}`);
           } else {
-            console.warn(`[useDetection] Received health for unknown plant_id: ${plantId}`);
+           // console.warn(`[useDetection] Received health for unknown plant_id: ${plantId}`);
           }
         }
       } catch (err) {
