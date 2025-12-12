@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   LineChart,
   Line,
@@ -120,12 +121,12 @@ const Graph = ({
             dataKey="timestamp"
             type="number"
             domain={["20", "20"]}
-            tickFormatter={(value) => formatTime(Number(value))}
+            tickFormatter={(value: any) => formatTime(Number(value))}
           />
           <YAxis />
           <Tooltip
             content={<CustomTooltip />}
-            labelFormatter={(value, tooltipPayload) => {
+            labelFormatter={(value: any, tooltipPayload: string | any[]) => {
               if (
                 tooltipPayload?.length &&
                 typeof tooltipPayload[0].payload.label === "string"
