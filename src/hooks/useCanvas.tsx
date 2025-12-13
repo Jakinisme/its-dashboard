@@ -49,13 +49,14 @@ export const useCanvas = (options: UseCanvasRendererOptions) => {
       animationFrameRef.current = requestAnimationFrame(drawCanvas);
       return;
     }
+    
     const videoWidth = video.videoWidth;
     const videoHeight = video.videoHeight;
 
     if (canvas.width !== videoWidth || canvas.height !== videoHeight) {
       canvas.width = videoWidth;
       canvas.height = videoHeight;
-     // console.log(`[useCanvas] Canvas resized to ${videoWidth}x${videoHeight}`);
+      console.log(`[useCanvas] Canvas resized to ${videoWidth}x${videoHeight}`);
     }
 
     const ctx = canvas.getContext("2d");
@@ -66,24 +67,15 @@ export const useCanvas = (options: UseCanvasRendererOptions) => {
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    const displayWidth = video.clientWidth;
-    const displayHeight = canvas.clientHeight;
-    
-    const scaleX = canvas.width / displayWidth;
-    const scaleY = canvas.height / displayHeight;
-
     if (detectionsRef.current && detectionsRef.current.length > 0) {
-      const firstRender = !animationFrameRef.current;
-      if (firstRender) {
-        console.log(`[useCanvas] Display: ${displayWidth}x${displayHeight}, Internal: ${canvas.width}x${canvas.height}`);
-        console.log(`[useCanvas] Scale factors: X=${scaleX.toFixed(2)}, Y=${scaleY.toFixed(2)}`);
-      }
-    }
-
-    if (detectionsRef.current && detectionsRef.current.length > 0) {
-      detectionsRef.current.forEach((det) => {
+      detectionsRef.current.forEach((det, idx) => {
         let { x1, y1, x2, y2 } = det;
         const { cls, conf, health } = det;
+
+        x1 = x1 * canvas.width;
+        y1 = y1 * canvas.height;
+        x2 = x2 * canvas.width;
+        y2 = y2 * canvas.height;
 
         x1 = Math.max(0, Math.min(x1, canvas.width));
         y1 = Math.max(0, Math.min(y1, canvas.height));
@@ -93,10 +85,10 @@ export const useCanvas = (options: UseCanvasRendererOptions) => {
         const boxWidth = x2 - x1;
         const boxHeight = y2 - y1;
 
-        //if (boxWidth <= 0 || boxHeight <= 0) {
-        //  console.warn(`[useCanvas] Skip invalid box ${idx}: (${x1},${y1})-(${x2},${y2})`);
-        //  return;
-        //}
+        if (boxWidth <= 0 || boxHeight <= 0) {
+          console.warn(`[useCanvas] Skip invalid box ${idx}: (${x1.toFixed(0)},${y1.toFixed(0)})-(${x2.toFixed(0)},${y2.toFixed(0)})`);
+          return;
+        }
 
         const colors = getHealthColor(health);
 
@@ -113,6 +105,7 @@ export const useCanvas = (options: UseCanvasRendererOptions) => {
         const textHeight = fontSize + 4; 
 
         const labelY = y1 > textHeight + 5 ? y1 - textHeight - 2 : y1 + boxHeight + 2;
+        
         ctx.fillStyle = colors.fill;
         ctx.fillRect(x1, labelY, textWidth + 10, textHeight);
 
@@ -120,9 +113,12 @@ export const useCanvas = (options: UseCanvasRendererOptions) => {
         ctx.textBaseline = "top";
         ctx.fillText(txt, x1 + 5, labelY + 2);
 
-       // if (idx === 0 && !animationFrameRef.current) {
-          //console.log(`[useCanvas] Drawing detection: cls=${cls}, bbox=(${x1.toFixed(0)},${y1.toFixed(0)})-(${x2.toFixed(0)},${y2.toFixed(0)}), size=${boxWidth.toFixed(0)}x${boxHeight.toFixed(0)}`);
-        //}
+        if (idx === 0) {
+          console.log(`[useCanvas] Drawing detection #${idx}: cls=${cls}, ` +
+            `normalized=(${det.x1.toFixed(3)},${det.y1.toFixed(3)})-(${det.x2.toFixed(3)},${det.y2.toFixed(3)}), ` +
+            `pixel=(${x1.toFixed(0)},${y1.toFixed(0)})-(${x2.toFixed(0)},${y2.toFixed(0)}), ` +
+            `size=${boxWidth.toFixed(0)}x${boxHeight.toFixed(0)}`);
+        }
       });
     }
 
@@ -130,13 +126,13 @@ export const useCanvas = (options: UseCanvasRendererOptions) => {
   }, [canvasRef, videoRef, detectionsRef, lineWidth, fontSize, showHealthLabel]);
 
   useEffect(() => {
-    //console.log("[useCanvas] Starting render loop");
+    console.log("[useCanvas] Starting render loop");
     animationFrameRef.current = requestAnimationFrame(drawCanvas);
 
     return () => {
       if (animationFrameRef.current) {
         cancelAnimationFrame(animationFrameRef.current);
-        //console.log("[useCanvas] Stopped render loop");
+        console.log("[useCanvas] Stopped render loop");
       }
     };
   }, [drawCanvas]);
