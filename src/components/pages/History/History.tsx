@@ -59,7 +59,7 @@ const History = () => {
                 healthStatus: {
                     healthy: 0,
                     unhealthy: 0,
-                    unknown: 0,
+                    warning: 0,
                 },
             };
         }
@@ -86,10 +86,10 @@ const History = () => {
                     return acc;
                 }
                 
-                acc.unknown++;
+                acc.warning++;
                 return acc;
             },
-            { healthy: 0, unhealthy: 0, unknown: 0 }
+            { healthy: 0, unhealthy: 0, warning: 0 }
         );
 
         return {
@@ -101,7 +101,7 @@ const History = () => {
 
     const detectionGauges: GaugeData[] = useMemo(() => {
         const { totalDetections, averageConfidence, healthStatus } = averageDetection;
-        const totalHealth = healthStatus.healthy + healthStatus.unhealthy + healthStatus.unknown;
+        const totalHealth = healthStatus.healthy + healthStatus.unhealthy + healthStatus.warning;
 
         return [
             {
@@ -349,9 +349,9 @@ const History = () => {
                                     </span>
                                 </div>
                                 <div className={styles.statItem}>
-                                    <span className={styles.statLabel}>Unknown:</span>
-                                    <span className={`${styles.statValue} ${styles.unknown}`}>
-                                        {averageDetection.healthStatus.unknown}
+                                    <span className={styles.statLabel}>Warning:</span>
+                                    <span className={`${styles.statValue} ${styles.warning}`}>
+                                        {averageDetection.healthStatus.warning}
                                     </span>
                                 </div>
                             </div>

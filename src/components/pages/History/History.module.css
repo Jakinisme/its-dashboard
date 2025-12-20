@@ -321,7 +321,7 @@
     color: #ff4842;
 }
 
-.statValue.unknown {
+.statValue.warning {
     color: #ffc658;
 }
 

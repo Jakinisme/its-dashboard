@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   loginWithEmail,
@@ -13,6 +13,17 @@ import Button from "../../ui/Button";
 import styles from "./Login.module.css";
 
 export default function Login() {
+  useEffect(() => {
+    // Disable body scrolling when component mounts
+    document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
+    
+    // Re-enable scrolling when component unmounts
+    return () => {
+      document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
+    };
+  }, []);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
