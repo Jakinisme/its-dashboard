@@ -84,10 +84,6 @@ const Camera = () => {
         { time: "13:25", activity: "Tanaman dalam keadaan sehat" },
     ]
 
-
-
-
-    
     return (
         <main className={styles.main}>
             <section className={styles.header}>
@@ -98,7 +94,7 @@ const Camera = () => {
             <section className={styles.layout}>
                 <div className={styles.primaryFeed}>
                     <div className={styles.streamHeader}>
-                        <h2>Vertical Garden</h2>
+                        <h2>Vertical Farming</h2>
                         <span className={styles.badge}>{isLive ? "Live" : "Offline"}</span>
                     </div>
 
