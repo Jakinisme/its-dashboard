@@ -27,6 +27,8 @@ export type SoilMetricKey = keyof typeof SOIL_METRIC_CONFIG;
 export const SOIL_RTDB_PATHS = {
   current: "soil/current",
   history: "soil/history",
+  weekly: "soil/weekly",
+  monthly: "soil/monthly",
 } as const;
 
 

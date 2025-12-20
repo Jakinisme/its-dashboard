@@ -1,19 +1,337 @@
-.History {
-    width: 100%;
+.main {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    padding: 2rem 2.5rem;
+    color: #fff;
+    overflow: hidden;
 }
 
-.content {
-    max-width: 1200px;
-    margin: 0 auto;
+.header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
 }
 
-.content h1 {
+.title {
     font-size: 2rem;
-    margin-bottom: 1rem;
+    margin: 0;
+    font-weight: 600;
 }
 
-.content p {
+.subtitle {
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin: 0;
+}
+
+.filterSection {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    padding: 1.5rem;
+    border-radius: 12px;
+    background: rgba(22, 28, 45, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.dataTypeSelector {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.dataTypeLabel {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.9);
+    min-width: 80px;
+}
+
+.dataTypeSelect {
+    flex: 0 0 auto;
+    min-width: 150px;
+    padding: 0.6rem 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    background: rgba(17, 22, 35, 0.95);
+    color: #ffffff;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.dataTypeSelect:hover {
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.dataTypeSelect:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+}
+
+.dateSelector {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.dateLabel {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.dateInputGroup {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.dateSelect {
+    flex: 1;
+    min-width: 200px;
+    padding: 0.6rem 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    background: rgba(17, 22, 35, 0.95);
+    color: #ffffff;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.dateSelect:hover {
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.dateSelect:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+}
+
+.dateSelect:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.dateDivider {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.85rem;
+}
+
+.dateInputWrapper {
+    display: flex;
+    gap: 0.5rem;
+    flex: 1;
+    min-width: 200px;
+}
+
+.dateInput {
+    flex: 1;
+    padding: 0.6rem 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    background: rgba(17, 22, 35, 0.95);
+    color: #ffffff;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+}
+
+.dateInput::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.dateInput:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+}
+
+.dateSubmitButton {
+    padding: 0.6rem 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #ffffff;
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.dateSubmitButton:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.dateSubmitButton:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.clearDateButton {
+    align-self: flex-start;
+    padding: 0.4rem 1rem;
+    border: 1px solid rgba(255, 72, 66, 0.3);
+    border-radius: 6px;
+    background: rgba(255, 72, 66, 0.1);
+    color: #ff4842;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.clearDateButton:hover {
+    background: rgba(255, 72, 66, 0.2);
+    border-color: rgba(255, 72, 66, 0.5);
+}
+
+.selectedDateLabel {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: rgba(255, 255, 255, 0.9);
+}
+
+.selectedDateLabel strong {
+    color: #667eea;
+}
+
+.filterButtons {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.filterButton {
+    padding: 0.6rem 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    background: rgba(17, 22, 35, 0.95);
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.filterButton:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: rgba(255, 255, 255, 0.3);
+    color: #ffffff;
+}
+
+.filterButton.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-color: #667eea;
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.periodLabel {
+    margin: 0;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.7);
+    font-style: italic;
+}
+
+.section {
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.loading,
+.error,
+.noData {
+    padding: 2rem;
+    text-align: center;
+    background: rgba(22, 28, 45, 0.85);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.error {
+    background: rgba(255, 72, 66, 0.1);
+    border-color: rgba(255, 72, 66, 0.3);
+    color: #ff4842;
+}
+
+.noData {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.statsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+}
+
+.statCard {
+    padding: 1.5rem;
+    border-radius: 12px;
+    background: linear-gradient(180deg, #1a1f2e 0%, #0f1419 100%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.statCard h3 {
+    margin: 0 0 1rem 0;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #ffffff;
+}
+
+.statContent {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.statItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.statItem:last-child {
+    border-bottom: none;
+}
+
+.statLabel {
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.statValue {
     font-size: 1.1rem;
-    color: #666;
+    font-weight: 600;
+    color: #ffffff;
+}
+
+.statValue.healthy {
+    color: #82ca9d;
+}
+
+.statValue.unhealthy {
+    color: #ff4842;
+}
+
+.statValue.unknown {
+    color: #ffc658;
+}
+
+@media (max-width: 768px) {
+    .main {
+        padding: 1.5rem 1rem;
+    }
+
+    .statsGrid {
+        grid-template-columns: 1fr;
+    }
 }
 
