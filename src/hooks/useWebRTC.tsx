@@ -112,7 +112,7 @@ export const useWebRTC = (
 
         console.log("[useWebRTC] WHEP negotiation complete");
       } catch (err) {
-        console.error("[useWebRTC] Start failed:", err);
+       //console.error("[useWebRTC] Start failed:", err);
         cleanupPC();
         if (!stopped) {
           setTimeout(start, reconnectDelay);
