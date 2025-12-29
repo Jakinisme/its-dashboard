@@ -5,7 +5,9 @@ import History from "../components/pages/History/History";
 import Camera from "../components/pages/Camera";
 import Login from "../components/pages/Login";
 import Register from "../components/pages/Register";
-import { ProtectedRoute, PublicRoute } from "../auth/RouteGuards";
+import EmailVerification from "../components/pages/EmailVerification";
+import VerifyRequired from "../components/pages/VerifyRequired";
+import { ProtectedRoute, PublicRoute, AuthenticatedRoute } from "../auth/RouteGuards";
 
 export const router = createBrowserRouter([
   {
@@ -45,6 +47,18 @@ export const router = createBrowserRouter([
       <PublicRoute>
         <Register />
       </PublicRoute>
+    ),
+  },
+  {
+    path: "/verify-email",
+    element: <EmailVerification />,
+  },
+  {
+    path: "/verify-required",
+    element: (
+      <AuthenticatedRoute>
+        <VerifyRequired />
+      </AuthenticatedRoute>
     ),
   },
   {

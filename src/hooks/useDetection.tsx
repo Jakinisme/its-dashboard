@@ -31,7 +31,7 @@ interface UseDetectionOptions {
 export const useDetection = (options: UseDetectionOptions = {}) => {
   const { 
     wsUrl = "ws://localhost:9001", 
-    maxDetections = 9,
+    maxDetections = 6,
     detectionTimeout = 1000 
   } = options;
 

@@ -1,9 +1,11 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useAuth } from "../../../hooks/useAuth";
 import {
   loginWithEmail,
   loginWithGoogle,
   loginWithGithub,
+  isGmail,
 } from "../../../auth/login";
 
 import googleIcon from "../../../assets/icons/google.svg";
@@ -13,17 +15,28 @@ import Button from "../../ui/Button";
 import styles from "./Login.module.css";
 
 export default function Login() {
+  const navigate = useNavigate();
+  const { user, isGmail: userIsGmail, isEmailVerified } = useAuth();
+  
   useEffect(() => {
-    // Disable body scrolling when component mounts
     document.body.style.overflow = "hidden";
     document.documentElement.style.overflow = "hidden";
     
-    // Re-enable scrolling when component unmounts
     return () => {
       document.body.style.overflow = "";
       document.documentElement.style.overflow = "";
     };
   }, []);
+
+  // Redirect when user is authenticated and verified
+  useEffect(() => {
+    if (user && userIsGmail && !isEmailVerified) {
+      navigate("/verify-required", { replace: true });
+    } else if (user && (!userIsGmail || isEmailVerified)) {
+      navigate("/", { replace: true });
+    }
+  }, [user, userIsGmail, isEmailVerified, navigate]);
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -31,9 +44,16 @@ export default function Login() {
   const handleEmailLogin = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
+    
+    // Validate Gmail for email/password login
+    if (!isGmail(email)) {
+      setError("Please use a Gmail address (@gmail.com) to log in.");
+      return;
+    }
+    
     try {
       await loginWithEmail(email, password);
-      console.log("Login success");
+      // Navigation will happen automatically via useEffect when auth state updates
     } catch (msg) {
       setError(String(msg));
     }
@@ -43,6 +63,7 @@ export default function Login() {
     setError("");
     try {
       await loginWithGoogle();
+      // Navigation will happen automatically via useEffect when auth state updates
     } catch (msg) {
       setError(String(msg));
     }
@@ -52,6 +73,7 @@ export default function Login() {
     setError("");
     try {
       await loginWithGithub();
+      // Navigation will happen automatically via useEffect when auth state updates
     } catch (msg) {
       setError(String(msg));
     }
@@ -87,7 +109,7 @@ export default function Login() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              minLength={6}
+              minLength={8}
             />
           </label>
 

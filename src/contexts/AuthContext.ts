@@ -5,6 +5,8 @@ export interface AuthContextValue {
   user: User | null;
   loading: boolean;
   logout: () => Promise<void>;
+  isEmailVerified: boolean;
+  isGmail: boolean;
 }
 
 export const AuthContext = createContext<AuthContextValue | undefined>(

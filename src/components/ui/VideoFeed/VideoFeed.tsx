@@ -11,13 +11,13 @@ const VideoFeed = () => {
 
   // Detection WebSocket hook
   const { detectionsRef, clearDetections } = useDetection({
-    wsUrl: import.meta.env.VITE_FALLBACK_WS,
+    wsUrl: import.meta.env.VITE_FALLBACK_WS || "wss://localhost:9001",
     maxDetections: 9,
   });
 
   // WebRTC WHEP connection hook
   useWebRTC(videoRef, {
-    metamtxHost: import.meta.env.VITE_FALLBACK_METAMTX,
+    metamtxHost: import.meta.env.VITE_FALLBACK_METAMTX || "localhost:8889",
     streamName: "camera",
     reconnectDelay: 3000,
     onConnected: () => {
