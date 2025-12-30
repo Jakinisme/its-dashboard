@@ -22,6 +22,42 @@ interface DetectionMessage {
   plant_id?: number;
 }
 
+const isValidBbox = (bbox: unknown): bbox is [number, number, number, number] => {
+  return (
+    Array.isArray(bbox) &&
+    bbox.length === 4 &&
+    bbox.every((n) => typeof n === "number" && n >= 0 && n <= 1)
+  );
+};
+
+const sanitizeString = (input: unknown, maxLength: number = 50): string => {
+  if (typeof input !== "string") return "unknown";
+  return input
+    .replace(/[<>'"]/g, "")
+    .slice(0, maxLength);
+};
+
+const isValidConfidence = (conf: unknown): conf is number => {
+  return typeof conf === "number" && conf >= 0 && conf <= 1;
+};
+
+const isValidPlantId = (id: unknown): id is number => {
+  return typeof id === "number" && Number.isInteger(id) && id >= 0;
+};
+
+const validateDetectionMessage = (msg: unknown): msg is DetectionMessage => {
+  if (!msg || typeof msg !== "object") return false;
+  
+  const m = msg as Record<string, unknown>;
+  
+  return (
+    isValidBbox(m.bbox) &&
+    typeof m.cls === "string" &&
+    m.cls.length > 0 &&
+    m.cls.length < 50
+  );
+};
+
 interface UseDetectionOptions {
   wsUrl?: string;
   maxDetections?: number;
@@ -58,7 +94,19 @@ export const useDetection = (options: UseDetectionOptions = {}) => {
   }, [detectionTimeout]);
 
   useEffect(() => {
-    const ws = new WebSocket(wsUrl);
+    let validatedWsUrl: string;
+    try {
+      const url = new URL(wsUrl);
+      if (url.protocol !== "ws:" && url.protocol !== "wss:") {
+        throw new Error("Invalid WebSocket protocol");
+      }
+      validatedWsUrl = url.toString();
+    } catch (err) {
+      console.error("[useDetection] Invalid WebSocket URL:", err);
+      return;
+    }
+
+    const ws = new WebSocket(validatedWsUrl);
     wsRef.current = ws;
 
     ws.onopen = () => {
@@ -67,57 +115,82 @@ export const useDetection = (options: UseDetectionOptions = {}) => {
 
     ws.onmessage = (ev) => {
       try {
+        if (ev.data.length > 100000) {
+          console.error("[useDetection] Message too large, ignoring");
+          return;
+        }
+
         const msg = JSON.parse(ev.data);
         const now = Date.now();
+        
+        if (!msg.type || typeof msg.type !== "string") {
+          console.warn("[useDetection] Invalid message type");
+          return;
+        }
         
         if (msg.type === "wide_batch") {
           lastUpdateTimeRef.current = now;
           
-          if (!msg.detections || msg.detections.length === 0) {
+          if (!msg.detections || !Array.isArray(msg.detections)) {
             console.log("[useDetection] No detections - clearing");
             detectionsRef.current = [];
             scheduleDetectionCleanup();
             return;
           }
 
+          if (msg.detections.length > maxDetections * 2) {
+            console.warn("[useDetection] Too many detections, truncating");
+            msg.detections = msg.detections.slice(0, maxDetections * 2);
+          }
+
           const currentPlantIds = new Set(
-            msg.detections.map((d: DetectionMessage) => d.plant_id).filter(Boolean)
+            msg.detections
+              .map((d: unknown) => (d as Record<string, unknown>).plant_id)
+              .filter((id: unknown): id is number => isValidPlantId(id))
           );
 
           const healthKeys = Array.from(healthStatusRef.current.keys());
           for (const plantId of healthKeys) {
             if (!currentPlantIds.has(plantId)) {
-              //console.log(`[useDetection] Plant ${plantId} disappeared, removing health status`);
               healthStatusRef.current.delete(plantId);
             }
           }
 
           detectionsRef.current = msg.detections
+            .filter(validateDetectionMessage)
             .slice(0, maxDetections)
             .map((d: DetectionMessage) => {
-              const plantId = d.plant_id || 0;
+              const plantId = isValidPlantId(d.plant_id) ? d.plant_id : 0;
               const storedHealth = healthStatusRef.current.get(plantId);
               
               return {
-                x1: d.bbox[0],
-                y1: d.bbox[1],
-                x2: d.bbox[2],
-                y2: d.bbox[3],
-                cls: d.cls,
-                conf: d.conf_det || d.conf || 0,
+                x1: Math.max(0, Math.min(1, d.bbox[0])),
+                y1: Math.max(0, Math.min(1, d.bbox[1])),
+                x2: Math.max(0, Math.min(1, d.bbox[2])),
+                y2: Math.max(0, Math.min(1, d.bbox[3])),
+                cls: sanitizeString(d.cls),
+                conf: isValidConfidence(d.conf_det || d.conf) 
+                  ? (d.conf_det || d.conf || 0)
+                  : 0,
                 plant_id: plantId,
-                health: storedHealth || d.health || "unknown",
+                health: sanitizeString(
+                  storedHealth || d.health || "unknown"
+                ),
                 timestamp: now,
               };
             });
           
-          //console.log(`[useDetection] Updated ${detectionsRef.current.length} detections`);
           scheduleDetectionCleanup();
         }
         
-        else if (msg.type === "classify" && msg.plant_id !== undefined) {
+        else if (msg.type === "classify") {
+          if (!isValidPlantId(msg.plant_id)) {
+            console.warn("[useDetection] Invalid plant_id in classify message");
+            return;
+          }
+
           const plantId = msg.plant_id;
-          const newHealth = msg.health || msg.status || "unknown";
+          const newHealth = sanitizeString(msg.health || msg.status || "unknown");
           
           healthStatusRef.current.set(plantId, newHealth);
           
@@ -125,9 +198,6 @@ export const useDetection = (options: UseDetectionOptions = {}) => {
           if (det) {
             det.health = newHealth;
             det.timestamp = now;
-           // console.log(`[useDetection] Plant ${plantId} health updated: ${newHealth}`);
-          } else {
-           // console.warn(`[useDetection] Received health for unknown plant_id: ${plantId}`);
           }
         }
       } catch (err) {
@@ -140,7 +210,6 @@ export const useDetection = (options: UseDetectionOptions = {}) => {
     };
 
     ws.onclose = () => {
-      //console.log("[useDetection] WebSocket disconnected");
       detectionsRef.current = [];
       healthStatusRef.current.clear();
     };
@@ -161,7 +230,6 @@ export const useDetection = (options: UseDetectionOptions = {}) => {
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
     }
-   // console.log("[useDetection] Manual clear");
   };
 
   return {

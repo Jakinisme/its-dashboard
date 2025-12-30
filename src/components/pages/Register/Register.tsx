@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+
 import {
   signUpWithEmail,
   loginWithGoogle,
@@ -13,17 +14,16 @@ import Button from "../../ui/Button";
 import styles from "./Register.module.css";
 
 const Register = () => {
-  useEffect(() => {
-    // Disable body scrolling when component mounts
-    document.body.style.overflow = "hidden";
-    document.documentElement.style.overflow = "hidden";
-    
-    // Re-enable scrolling when component unmounts
-    return () => {
-      document.body.style.overflow = "";
-      document.documentElement.style.overflow = "";
-    };
-  }, []);
+    useEffect(() => {
+      document.body.style.overflow = "hidden";
+      document.documentElement.style.overflow = "hidden";
+      
+      return () => {
+        document.body.style.overflow = "";
+        document.documentElement.style.overflow = "";
+      };
+    }, []);
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -84,14 +84,14 @@ const Register = () => {
             <input
               className={styles.input}
               type="password"
-              placeholder="At least 6 characters"
+              placeholder="At least 8 characters"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              minLength={6}
+              minLength={8}
             />
             <span className={styles.requirement}>
-              Use 6 or more characters with a mix of letters and numbers.
+              Use 8 or more characters with a mix of letters and numbers.
             </span>
           </label>
 
