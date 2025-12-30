@@ -251,13 +251,6 @@ const History = () => {
                                     }
                                 }}
                             />
-                            <button
-                                className={styles.dateSubmitButton}
-                                onClick={handleManualDateSubmit}
-                                disabled={!dateInput}
-                            >
-                                Go
-                            </button>
                         </div>
                     </div>
                     {selectedDate && (

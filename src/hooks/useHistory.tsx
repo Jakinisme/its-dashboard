@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
+
 import { onValue, ref } from "firebase/database";
+import { database } from "../services/Firebase";
 
 import type { GraphData } from "../types/charts";
-import { database } from "../services/Firebase";
+
 import { SOIL_METRIC_CONFIG, SOIL_RTDB_PATHS } from "../constants/soil";
 import {
   METRIC_KEYS,
@@ -69,11 +71,9 @@ export const useHistory = (selectedDate?: string, dataType: DataType = 'daily'):
         let entries: SoilHistoryEntry[] = [];
 
         if (selectedDate) {
-          // Single date selected - data is directly the metrics object
-          // Handle both "humidtiy" typo and "humidity"
           const sanitized = sanitizeSoilSnapshot(rawData as Record<string, unknown>);
+
           if (sanitized) {
-            // Convert date string (DD-MM-YYYY) to timestamp
             const [day, month, year] = selectedDate.split("-").map(Number);
             const date = new Date(year, month - 1, day);
             
@@ -89,20 +89,17 @@ export const useHistory = (selectedDate?: string, dataType: DataType = 'daily'):
             });
           }
         } else {
-          // All dates - data is organized by date keys
           const rawHistory = rawData as Record<string, Record<string, unknown>> | null;
           
           if (rawHistory) {
             entries = Object.entries(rawHistory).reduce<SoilHistoryEntry[]>(
               (accumulator, [dateKey, value]) => {
-                // Skip if it's not a date format (like nested objects)
                 if (!/^\d{2}-\d{2}-\d{4}$/.test(dateKey)) {
                   return accumulator;
                 }
 
                 const sanitized = sanitizeSoilSnapshot(value);
                 if (sanitized) {
-                  // Convert date string (DD-MM-YYYY) to timestamp
                   const [day, month, year] = dateKey.split("-").map(Number);
                   const date = new Date(year, month - 1, day);
                   
