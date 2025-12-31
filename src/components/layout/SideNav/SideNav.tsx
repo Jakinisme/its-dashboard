@@ -42,7 +42,7 @@ const SideNav = () => {
     <nav className={styles.SideNav}>
       <div className={styles.content}>
         <div className={styles.logo}>
-          <span>Dame Engker</span>
+          <span>TechAgro</span>
         </div>
 
         <div className={styles.menu}>

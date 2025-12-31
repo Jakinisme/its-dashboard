@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 
 import styles from './History.module.css';
 import Gauges from '../../ui/Gauges';
-import StatusItem from './childComp/StatusItem/StatusItem';
+import StatusItem from './sections/StatusItem';
 
 import { useHistory } from '../../../hooks/useHistory';
 import { useAvailableDatesByType } from '../../../hooks/useAvailableDatesByType';
