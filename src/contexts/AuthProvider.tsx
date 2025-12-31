@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState, type PropsWithChildren } from "react";
 import { onAuthStateChanged, signOut, type User } from "firebase/auth";
 
 import { auth, authReady } from "../services/Firebase";
+import { isGmail } from "../auth/login";
 import type { AuthContextValue } from "./AuthContext";
 import { AuthContext } from "./AuthContext";
 
@@ -36,13 +37,23 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
     };
   }, []);
 
+  const isEmailVerified = useMemo(() => {
+    return user?.emailVerified ?? false;
+  }, [user]);
+
+  const userIsGmail = useMemo(() => {
+    return user?.email ? isGmail(user.email) : false;
+  }, [user]);
+
   const value = useMemo<AuthContextValue>(
     () => ({
       user,
       loading,
       logout: () => signOut(auth),
+      isEmailVerified,
+      isGmail: userIsGmail,
     }),
-    [user, loading],
+    [user, loading, isEmailVerified, userIsGmail],
   );
 
   return (
