@@ -15,7 +15,7 @@ const EmailVerification = () => {
   useEffect(() => {
     document.body.style.overflow = "hidden";
     document.documentElement.style.overflow = "hidden";
-    
+
     return () => {
       document.body.style.overflow = "";
       document.documentElement.style.overflow = "";
@@ -38,15 +38,16 @@ const EmailVerification = () => {
 
       try {
         await checkVerificationCode(actionCode);
-        
+
         await verifyEmail(actionCode);
-        
+
         setStatus("success");
-        setMessage("Email verified successfully! You can now log in.");
-        
+        setMessage("Email verified successfully! Redirecting to dashboard...");
+
         setTimeout(() => {
-          navigate("/login");
-        }, 3000);
+          navigate("/", { replace: true });
+          window.location.reload();
+        }, 2000);
       } catch (err: unknown) {
         setStatus("error");
         if (err instanceof Error) {
@@ -68,7 +69,7 @@ const EmailVerification = () => {
           {status === "success" && "Email Verified!"}
           {status === "error" && "Verification Failed"}
         </h2>
-        
+
         <div className={styles.content}>
           {status === "verifying" && (
             <div className={styles.spinner}></div>
@@ -79,13 +80,13 @@ const EmailVerification = () => {
           {status === "error" && (
             <div className={styles.errorIcon}>✗</div>
           )}
-          
+
           <p className={styles.message}>{message}</p>
         </div>
 
         {status === "success" && (
           <p className={styles.redirectMessage}>
-            Redirecting to login page...
+            Redirecting to dashboard...
           </p>
         )}
 

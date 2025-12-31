@@ -3,6 +3,7 @@
     opacity: 0;
     transform: translateY(24px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -19,9 +20,11 @@
   0% {
     transform: scale(0);
   }
+
   50% {
-    transform: scale(1.2);
+    transform: scale(1.1);
   }
+
   100% {
     transform: scale(1);
   }
@@ -37,27 +40,30 @@
   align-items: center;
   justify-content: center;
   padding: 3rem 1.5rem;
-  background: radial-gradient(circle at top, rgba(96, 165, 250, 0.15), transparent 55%);
+  background-color: #09090b;
+  /* Solid deep dark */
   overflow: hidden;
 }
 
 .card {
-  width: min(460px, 100%);
-  padding: 3rem 2.25rem 2.5rem;
-  border-radius: 22px;
-  background: rgba(12, 14, 24, 0.92);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 30px 50px rgba(0, 0, 0, 0.55);
-  backdrop-filter: blur(18px);
-  animation: cardEntrance 420ms ease;
+  width: min(440px, 100%);
+  padding: 3rem 2.5rem;
+  border-radius: 16px;
+  background-color: #18181b;
+  /* Zinc-900 */
+  border: 1px solid #27272a;
+  /* Zinc-800 */
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5);
+  animation: cardEntrance 400ms cubic-bezier(0.16, 1, 0.3, 1);
   text-align: center;
 }
 
 .title {
-  font-size: 2rem;
-  font-weight: 700;
+  font-size: 1.75rem;
+  font-weight: 600;
   margin-bottom: 2rem;
   color: #ffffff;
+  letter-spacing: -0.025em;
 }
 
 .content {
@@ -69,89 +75,93 @@
 }
 
 .spinner {
-  width: 48px;
-  height: 48px;
-  border: 4px solid rgba(96, 165, 250, 0.2);
-  border-top-color: #60a5fa;
+  width: 40px;
+  height: 40px;
+  border: 3px solid rgba(255, 255, 255, 0.1);
+  border-top-color: #ffffff;
   border-radius: 50%;
-  animation: spin 1s linear infinite;
+  animation: spin 0.8s linear infinite;
 }
 
 .successIcon {
-  width: 64px;
-  height: 64px;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
-  background: linear-gradient(120deg, #4ade80, #22d3ee);
-  color: #0b1120;
-  font-size: 2.5rem;
+  background-color: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #ffffff;
+  font-size: 1.75rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: bold;
-  animation: checkmark 0.5s ease-out;
+  animation: checkmark 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .errorIcon {
-  width: 64px;
-  height: 64px;
+  width: 56px;
+  height: 56px;
   border-radius: 50%;
-  background: linear-gradient(120deg, #fb7185, #f87171);
-  color: #ffffff;
-  font-size: 2.5rem;
+  background-color: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #a1a1aa;
+  /* Muted grey for error icon to keep it elegant, or maybe white */
+  font-size: 1.75rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: bold;
-  animation: checkmark 0.5s ease-out;
+  animation: checkmark 0.4s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .message {
-  font-size: 1rem;
-  color: rgba(255, 255, 255, 0.85);
-  line-height: 1.6;
+  font-size: 0.95rem;
+  color: #a1a1aa;
+  /* Zinc-400 */
+  line-height: 1.5;
   max-width: 100%;
 }
 
 .redirectMessage {
-  font-size: 0.9rem;
-  color: rgba(255, 255, 255, 0.65);
+  font-size: 0.85rem;
+  color: #71717a;
+  /* Zinc-500 */
   margin-top: 1rem;
 }
 
 .actions {
   display: flex;
   flex-direction: column;
-  gap: 0.8rem;
+  gap: 0.75rem;
   margin-top: 2rem;
 }
 
 .button {
   width: 100%;
-  border-radius: 12px;
-  padding: 0.95rem 1rem;
-  font-weight: 600;
-  font-size: 1rem;
-  background: linear-gradient(120deg, #60a5fa, #a855f7);
-  color: #0b1120;
-  border: none;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  font-weight: 500;
+  font-size: 0.95rem;
+  background-color: #ffffff;
+  color: #09090b;
+  border: 1px solid #ffffff;
   cursor: pointer;
-  transition: transform 180ms ease, box-shadow 180ms ease;
+  transition: all 0.2s ease;
   text-decoration: none;
   display: block;
 }
 
 .button:hover {
+  background-color: #e4e4e7;
+  /* Zinc-200 */
+  border-color: #e4e4e7;
   transform: translateY(-1px);
-  box-shadow: 0 12px 30px rgba(96, 165, 250, 0.35);
 }
 
 @media (max-width: 640px) {
   .card {
-    padding: 2.5rem 1.5rem 2rem;
+    padding: 2rem 1.5rem;
   }
 
   .title {
-    font-size: 1.7rem;
+    font-size: 1.5rem;
   }
 }
-

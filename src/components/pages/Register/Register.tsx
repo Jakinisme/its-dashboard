@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../../hooks/useAuth";
 
 import {
@@ -14,16 +14,17 @@ import googleIcon from "../../../assets/icons/google.svg";
 import githubIcon from "../../../assets/icons/github.svg";
 
 import Button from "../../ui/Button";
+import AuthLayout from "../../layout/AuthLayout";
 import styles from "./Register.module.css";
 
 const Register = () => {
   const navigate = useNavigate();
   const { user, isGmail: userIsGmail, isEmailVerified } = useAuth();
-  
+
   useEffect(() => {
     document.body.style.overflow = "hidden";
     document.documentElement.style.overflow = "hidden";
-    
+
     return () => {
       document.body.style.overflow = "";
       document.documentElement.style.overflow = "";
@@ -50,8 +51,7 @@ const Register = () => {
     setError("");
     setSuccess("");
     setIsVerifying(false);
-
-    // Validate Gmail
+    
     if (!isGmail(email)) {
       setError("Please use a Gmail address (@gmail.com) to register.");
       return;
@@ -60,11 +60,9 @@ const Register = () => {
     try {
       setIsVerifying(true);
       await signUpWithEmail(email, password);
-      
-      // Send verification email
+
       await sendVerificationEmail();
-      
-      // Navigation will happen automatically via useEffect when auth state updates
+
       setIsVerifying(false);
     } catch (msg) {
       setError(String(msg));
@@ -91,87 +89,81 @@ const Register = () => {
   };
 
   return (
-    <section className={styles.page}>
-      <div className={styles.card}>
-        <h2 className={styles.title}>Create an account</h2>
-        <p className={styles.subtitle}>
-          Start monitoring irrigation data and receive smarter alerts.
-        </p>
+    <AuthLayout
+      title="Create an account"
+      subtitle="Start monitoring irrigation data and receive smarter alerts."
+      footerText="Already have an account?"
+      footerLinkText="Log in"
+      footerLinkTo="/login"
+    >
+      <form className={styles.form} onSubmit={handleRegister}>
+        <label className={styles.inputGroup}>
+          <span className={styles.label}>Email address</span>
+          <input
+            className={styles.input}
+            type="email"
+            placeholder="you@email.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+        </label>
 
-        <form className={styles.form} onSubmit={handleRegister}>
-          <label className={styles.inputGroup}>
-            <span className={styles.label}>Email address</span>
-            <input
-              className={styles.input}
-              type="email"
-              placeholder="you@email.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-            />
-          </label>
+        <label className={styles.inputGroup}>
+          <span className={styles.label}>Password</span>
+          <input
+            className={styles.input}
+            type="password"
+            placeholder="At least 8 characters"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            minLength={8}
+          />
+          <span className={styles.requirement}>
+            Use 8 or more characters with a mix of letters and numbers.
+          </span>
+        </label>
 
-          <label className={styles.inputGroup}>
-            <span className={styles.label}>Password</span>
-            <input
-              className={styles.input}
-              type="password"
-              placeholder="At least 8 characters"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required
-              minLength={8}
-            />
-            <span className={styles.requirement}>
-              Use 8 or more characters with a mix of letters and numbers.
-            </span>
-          </label>
+        <Button
+          className={styles.primaryButton}
+          type="submit"
+          disabled={isVerifying}
+        >
+          {isVerifying ? "Creating account..." : "Create account"}
+        </Button>
+      </form>
 
-          <Button 
-            className={styles.primaryButton} 
-            type="submit"
-            disabled={isVerifying}
-          >
-            {isVerifying ? "Creating account..." : "Create account"}
-          </Button>
-        </form>
-
-        <div className={styles.providers}>
-          <Button
-            className={styles.providerButton}
-            type="button"
-            onClick={handleGoogle}
-          >
-            Continue with <img className={styles.icon} src={googleIcon} alt="google" />
-          </Button>
-          <Button
-            className={styles.providerButton}
-            type="button"
-            onClick={handleGithub}
-          >
-            Continue with <img className={styles.icon} src={githubIcon} alt="github" />
-          </Button>
-        </div>
-
-        {error && (
-          <p className={styles.error} aria-live="polite">
-            {error}
-          </p>
-        )}
-        {success && (
-          <p className={styles.success} aria-live="polite">
-            {success}
-          </p>
-        )}
-
-        <p className={styles.secondaryAction}>
-          Already have an account?
-          <Link className={styles.link} to="/login">
-            Log in
-          </Link>
-        </p>
+      <div className={styles.providers}>
+        <Button
+          className={styles.providerButton}
+          type="button"
+          onClick={handleGoogle}
+        >
+          <img className={styles.icon} src={googleIcon} alt="google" />
+          Continue with Google
+        </Button>
+        <Button
+          className={styles.providerButton}
+          type="button"
+          onClick={handleGithub}
+        >
+          <img className={styles.icon} src={githubIcon} alt="github" />
+          Continue with Github
+        </Button>
       </div>
-    </section>
+
+      {error && (
+        <p className={styles.error} aria-live="polite">
+          {error}
+        </p>
+      )}
+      {success && (
+        <p className={styles.success} aria-live="polite">
+          {success}
+        </p>
+      )}
+    </AuthLayout>
   );
 }
 

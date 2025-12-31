@@ -63,12 +63,33 @@ export async function sendVerificationEmail() {
   try {
     const user = auth.currentUser;
     if (!user) {
-      throw "No user is currently signed in";
+      throw new Error("No user is currently signed in");
     }
-    await sendEmailVerification(user);
+
+    if (user.emailVerified) {
+      console.log("User email is already verified");
+      return;
+    }
+
+    console.log("Sending verification email to:", user.email);
+
+    // Configure action code settings to redirect back to our app
+    const actionCodeSettings = {
+      url: window.location.origin + "/verify-email",
+      handleCodeInApp: true,
+    };
+
+    await sendEmailVerification(user, actionCodeSettings);
+    console.log("Verification email sent successfully");
   } catch (err: unknown) {
-    if (err instanceof FirebaseError) throw err.message;
-    throw "Unexpected error";
+    console.error("Error sending verification email:", err);
+    if (err instanceof FirebaseError) {
+      throw new Error(err.message);
+    }
+    if (err instanceof Error) {
+      throw err;
+    }
+    throw new Error("Failed to send verification email");
   }
 }
 

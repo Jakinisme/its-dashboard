@@ -22,7 +22,6 @@ export const ProtectedRoute = ({ children }: RouteGuardProps) => {
     return <Navigate to="/register" replace />;
   }
 
-  // For Gmail accounts, require email verification
   if (isGmail && !isEmailVerified) {
     return <Navigate to="/verify-required" replace />;
   }
@@ -37,8 +36,6 @@ export const PublicRoute = ({ children }: RouteGuardProps) => {
     return <LoadingFallback />;
   }
 
-  // Allow access if user is authenticated but not verified (Gmail accounts)
-  // This allows them to log out or use a different account
   if (user && (!isGmail || isEmailVerified)) {
     return <Navigate to="/" replace />;
   }
@@ -46,18 +43,35 @@ export const PublicRoute = ({ children }: RouteGuardProps) => {
   return children;
 };
 
-/**
- * Route guard for pages that require authentication but allow unverified Gmail users
- * (e.g., the verify-required page)
- */
 export const AuthenticatedRoute = ({ children }: RouteGuardProps) => {
-  const { user, loading } = useAuth();
+  const { user, loading, isEmailVerified, isGmail } = useAuth();
 
   if (loading) {
     return <LoadingFallback />;
   }
 
   if (!user) {
+    return <Navigate to="/register" replace />;
+  }
+
+  if (isGmail && isEmailVerified) {
+    return <Navigate to="/" replace />;
+  }
+
+  return children;
+};
+
+export const VerificationRoute = ({ children }: RouteGuardProps) => {
+  const { loading } = useAuth();
+
+  if (loading) {
+    return <LoadingFallback />;
+  }
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const oobCode = urlParams.get("oobCode");
+
+  if (!oobCode) {
     return <Navigate to="/register" replace />;
   }
 

@@ -7,7 +7,7 @@ import Login from "../components/pages/Login";
 import Register from "../components/pages/Register";
 import EmailVerification from "../components/pages/EmailVerification";
 import VerifyRequired from "../components/pages/VerifyRequired";
-import { ProtectedRoute, PublicRoute, AuthenticatedRoute } from "../auth/RouteGuards";
+import { ProtectedRoute, PublicRoute, AuthenticatedRoute, VerificationRoute } from "../auth/RouteGuards";
 
 export const router = createBrowserRouter([
   {
@@ -51,7 +51,11 @@ export const router = createBrowserRouter([
   },
   {
     path: "/verify-email",
-    element: <EmailVerification />,
+    element: (
+      <VerificationRoute>
+        <EmailVerification />
+      </VerificationRoute>
+    ),
   },
   {
     path: "/verify-required",
