@@ -31,7 +31,6 @@ const Register = () => {
     };
   }, []);
 
-  // Redirect when user is authenticated
   useEffect(() => {
     if (user && userIsGmail && !isEmailVerified) {
       navigate("/verify-required", { replace: true });

@@ -29,7 +29,6 @@ export default function Login() {
     };
   }, []);
 
-  // Redirect when user is authenticated and verified
   useEffect(() => {
     if (user && userIsGmail && !isEmailVerified) {
       navigate("/verify-required", { replace: true });
@@ -46,7 +45,6 @@ export default function Login() {
     e.preventDefault();
     setError("");
 
-    // Validate Gmail for email/password login
     if (!isGmail(email)) {
       setError("Please use a Gmail address (@gmail.com) to log in.");
       return;
@@ -54,7 +52,6 @@ export default function Login() {
 
     try {
       await loginWithEmail(email, password);
-      // Navigation will happen automatically via useEffect when auth state updates
     } catch (msg) {
       setError(String(msg));
     }
@@ -64,7 +61,6 @@ export default function Login() {
     setError("");
     try {
       await loginWithGoogle();
-      // Navigation will happen automatically via useEffect when auth state updates
     } catch (msg) {
       setError(String(msg));
     }
@@ -74,7 +70,6 @@ export default function Login() {
     setError("");
     try {
       await loginWithGithub();
-      // Navigation will happen automatically via useEffect when auth state updates
     } catch (msg) {
       setError(String(msg));
     }
