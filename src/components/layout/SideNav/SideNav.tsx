@@ -66,7 +66,9 @@ const SideNav = () => {
             </Button>
           </div>
         </div>
-        <Profile />
+        <div className={styles.profile}>
+          <Profile />
+        </div>
       </div>
     </nav>
   );
