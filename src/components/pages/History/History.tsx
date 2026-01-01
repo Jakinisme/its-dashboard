@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react';
 
 import styles from './History.module.css';
 import Gauges from '../../ui/Gauges';
+import StatusItem from './sections/StatusItem';
 
 import { useHistory } from '../../../hooks/useHistory';
 import { useAvailableDatesByType } from '../../../hooks/useAvailableDatesByType';
@@ -58,7 +59,7 @@ const History = () => {
                 averageConfidence: 0,
                 healthStatus: {
                     healthy: 0,
-                    unhealthy: 0,
+                    diseased: 0,
                     warning: 0,
                 },
             };
@@ -82,14 +83,14 @@ const History = () => {
                 }
                 
                 if (entry.moisture < 20) {
-                    acc.unhealthy++;
+                    acc.diseased++;
                     return acc;
                 }
                 
                 acc.warning++;
                 return acc;
             },
-            { healthy: 0, unhealthy: 0, warning: 0 }
+            { healthy: 0, diseased: 0, warning: 0 }
         );
 
         return {
@@ -101,13 +102,13 @@ const History = () => {
 
     const detectionGauges: GaugeData[] = useMemo(() => {
         const { totalDetections, averageConfidence, healthStatus } = averageDetection;
-        const totalHealth = healthStatus.healthy + healthStatus.unhealthy + healthStatus.warning;
+        const totalHealth = healthStatus.healthy + healthStatus.diseased + healthStatus.warning;
 
         return [
             {
                 name: 'Total Detections',
                 value: totalDetections,
-                maxValue: Math.max(totalDetections, 9),
+                maxValue: Math.max(totalDetections, 6),
                 color: '#8884d8',
             },
             {
@@ -119,13 +120,13 @@ const History = () => {
             {
                 name: 'Healthy Plants',
                 value: healthStatus.healthy,
-                maxValue: totalHealth || 9,
+                maxValue: totalHealth || 6,
                 color: '#82ca9d',
             },
             {
-                name: 'Unhealthy Plants',
-                value: healthStatus.unhealthy,
-                maxValue: totalHealth || 9,
+                name: 'Diseased Plants',
+                value: healthStatus.diseased,
+                maxValue: totalHealth || 6,
                 color: '#ff4842',
             },
         ];
@@ -329,24 +330,7 @@ const History = () => {
                         <div className={styles.statCard}>
                             <h3>Health Status</h3>
                             <div className={styles.statContent}>
-                                <div className={styles.statItem}>
-                                    <span className={styles.statLabel}>Healthy:</span>
-                                    <span className={`${styles.statValue} ${styles.healthy}`}>
-                                        {averageDetection.healthStatus.healthy}
-                                    </span>
-                                </div>
-                                <div className={styles.statItem}>
-                                    <span className={styles.statLabel}>Unhealthy:</span>
-                                    <span className={`${styles.statValue} ${styles.unhealthy}`}>
-                                        {averageDetection.healthStatus.unhealthy}
-                                    </span>
-                                </div>
-                                <div className={styles.statItem}>
-                                    <span className={styles.statLabel}>Warning:</span>
-                                    <span className={`${styles.statValue} ${styles.warning}`}>
-                                        {averageDetection.healthStatus.warning}
-                                    </span>
-                                </div>
+                                <StatusItem healthStatus={averageDetection.healthStatus} />
                             </div>
                         </div>
                     </section>
