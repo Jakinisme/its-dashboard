@@ -3,7 +3,6 @@
     min-height: 100vh;
     width: 100%;
     background-color: #00000000;
-    /* Deep black background */
     color: #ffffff;
     font-family: 'Inter', sans-serif;
 }
@@ -14,10 +13,6 @@
     flex-direction: column;
     justify-content: center;
     padding: 2rem;
-    max-width: 600px;
-    background-color: #18181b;
-    /* Dark grey for form area */
-    border-right: 1px solid #27272a;
 }
 
 .brandingSection {
@@ -26,15 +21,15 @@
     align-items: center;
     justify-content: center;
     background-color: #ffffff;
-    /* White background for branding */
     position: relative;
     overflow: hidden;
 }
 
-/* Show branding section on larger screens */
 @media (min-width: 1024px) {
     .brandingSection {
         display: flex;
+        margin: 12px;
+        border-radius: 30px;
     }
 }
 
@@ -76,6 +71,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    animation: fadeIn 1s ease-out;
 }
 
 .brandingText {
@@ -90,6 +86,7 @@
     height: 800px;
     margin-bottom: 1rem;
     opacity: 0.9;
+    animation: float 6s ease-in-out infinite;
 }
 
 .footer {
@@ -109,4 +106,31 @@
 .link:hover {
     text-decoration: none;
     color: #d1d5db;
+}
+
+/* Animations */
+@keyframes float {
+    0% {
+        transform: translateY(0px);
+    }
+
+    50% {
+        transform: translateY(-20px);
+    }
+
+    100% {
+        transform: translateY(0px);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }

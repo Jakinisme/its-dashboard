@@ -13,7 +13,6 @@
 .label {
   font-size: 0.9rem;
   color: #d1d5db;
-  /* Light grey */
   font-weight: 500;
 }
 
@@ -22,9 +21,7 @@
   padding: 0.875rem 1rem;
   border-radius: 8px;
   border: 1px solid #374151;
-  /* Dark grey border */
   background: #111827;
-  /* Darker background for input */
   color: #ffffff;
   font-size: 0.95rem;
   transition: all 150ms ease;
@@ -34,7 +31,6 @@
 .input:focus {
   outline: none;
   border-color: #ffffff;
-  /* White focus border */
   box-shadow: 0 0 0 1px #ffffff;
 }
 
@@ -56,9 +52,7 @@
   font-weight: 600;
   font-size: 1rem;
   background-color: #ffffff;
-  /* White button */
   color: #000000;
-  /* Black text */
   border: none;
   cursor: pointer;
   transition: background-color 150ms ease;
@@ -66,7 +60,6 @@
 
 .primaryButton:hover:not(:disabled) {
   background-color: #e5e7eb;
-  /* Light grey hover */
 }
 
 .primaryButton:disabled {
@@ -123,6 +116,5 @@
   margin-top: 1rem;
   font-size: 0.875rem;
   color: #ef4444;
-  /* Red */
   text-align: center;
 }

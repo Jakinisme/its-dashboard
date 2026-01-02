@@ -135,9 +135,9 @@ export default function Login() {
         </Button>
       </div>
 
-      <p className={styles.error} aria-live="polite">
+      <span className={styles.error} aria-live="polite">
         {error}
-      </p>
+      </span>
     </AuthLayout>
   );
 }

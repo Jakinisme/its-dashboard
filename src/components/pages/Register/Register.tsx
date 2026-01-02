@@ -153,14 +153,14 @@ const Register = () => {
       </div>
 
       {error && (
-        <p className={styles.error} aria-live="polite">
+        <span className={styles.error} aria-live="polite">
           {error}
-        </p>
+        </span>
       )}
       {success && (
-        <p className={styles.success} aria-live="polite">
+        <span className={styles.success} aria-live="polite">
           {success}
-        </p>
+        </span>
       )}
     </AuthLayout>
   );
