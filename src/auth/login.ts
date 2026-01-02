@@ -48,17 +48,11 @@ export async function loginWithGithub() {
   }
 }
 
-/**
- * Validates if an email is a Gmail address
- */
 export function isGmail(email: string): boolean {
   const emailLower = email.toLowerCase().trim();
   return emailLower.endsWith("@gmail.com");
 }
 
-/**
- * Sends email verification to the current user
- */
 export async function sendVerificationEmail() {
   try {
     const user = auth.currentUser;
@@ -73,7 +67,6 @@ export async function sendVerificationEmail() {
 
     console.log("Sending verification email to:", user.email);
 
-    // Configure action code settings to redirect back to our app
     const actionCodeSettings = {
       url: window.location.origin + "/verify-email",
       handleCodeInApp: true,
@@ -93,9 +86,6 @@ export async function sendVerificationEmail() {
   }
 }
 
-/**
- * Verifies the email using the action code from the verification link
- */
 export async function verifyEmail(actionCode: string) {
   try {
     await applyActionCode(auth, actionCode);
@@ -105,9 +95,6 @@ export async function verifyEmail(actionCode: string) {
   }
 }
 
-/**
- * Checks if the action code is valid (before applying it)
- */
 export async function checkVerificationCode(actionCode: string) {
   try {
     return await checkActionCode(auth, actionCode);
