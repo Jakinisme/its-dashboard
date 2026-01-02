@@ -1,5 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+
+import logoImage from '../../../assets/icons/logo.svg';
 import styles from './AuthLayout.module.css';
 
 interface AuthLayoutProps {
@@ -43,7 +45,7 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({
 
             <div className={styles.brandingSection}>
                 <div className={styles.brandingContent}>
-                    <h1 className={styles.brandingText}>Something will be placed here, cihuy!</h1>
+                    <img src={logoImage} alt="TechAgro Logo" className={styles.brandingLogo} />
                 </div>
             </div>
         </div>
