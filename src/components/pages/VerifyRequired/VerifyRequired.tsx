@@ -62,7 +62,7 @@ const VerifyRequired = () => {
           <div className={styles.icon}>✉️</div>
           <p className={styles.message}>
             We've sent a verification email to <strong>{user?.email}</strong>.
-            Please check your inbox and click the verification link.
+            Please check your inbox and click the verification link <strong>(check spam, if you can't find the email)</strong>.
           </p>
         </div>
 

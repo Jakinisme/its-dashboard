@@ -111,6 +111,7 @@ export const useWebRTC = (
         await pc.setRemoteDescription({ type: "answer", sdp: answerSdp });
 
         console.log("[useWebRTC] WHEP negotiation complete");
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (err) {
        //console.error("[useWebRTC] Start failed:", err);
         cleanupPC();
