@@ -8,7 +8,6 @@ import { useStreamState } from "../../../hooks/useStreamState";
 const Camera = () => {
   const { isLive } = useLive();
 
-  // Use the new stream state hook - much cleaner!
   const { timeAgo } = useStreamState({
     streamId: "vertical_farming_cam_01",
     isLive,
