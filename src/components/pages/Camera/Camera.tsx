@@ -20,13 +20,17 @@ const Camera = () => {
     { label: "FPS", value: "15" },
   ]
   const cameraStatus = [
-    { label: "Camera 01", location: "Vertical Farming", status: `${isLive ? "Live" : "Offline"}` },
+    { label: "Camera 01", location: "Vertical Garden", status: `${isLive ? "Live" : "Offline"}` },
   ]
   const recentActivity = [
     { time: "14:05", activity: "Tanaman dalam keadaan sehat" },
     { time: "13:58", activity: "Tanaman memiliki indikasi penyakit" },
     { time: "13:25", activity: "Tanaman dalam keadaan sehat" },
   ]
+
+
+
+
 
   return (
     <main className={styles.main}>
@@ -38,7 +42,7 @@ const Camera = () => {
       <section className={styles.layout}>
         <div className={styles.primaryFeed}>
           <div className={styles.streamHeader}>
-            <h2>Vertical Farming</h2>
+            <h2>Vertical Garden</h2>
             <span className={styles.badge}>{isLive ? "Live" : "Offline"}</span>
           </div>
 
