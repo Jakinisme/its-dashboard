@@ -76,7 +76,7 @@ const Camera = () => {
         { label: "FPS", value: "15" },
     ]
     const cameraStatus = [
-        { label: "Camera 01", location: "Vertical Garden", status: `${isLive ? "Live" : "Offline"}` },
+        { label: "Camera 01", location: "Vertical Farming", status: `${isLive ? "Live" : "Offline"}` },
     ]
     const recentActivity = [
         { time: "14:05", activity: "Tanaman dalam keadaan sehat" },
