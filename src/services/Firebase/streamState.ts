@@ -1,26 +1,16 @@
 import { ref, onValue, set, serverTimestamp, get, type Unsubscribe } from "firebase/database";
 import { database } from "./index";
 
-/**
- * Stream state data structure in Firebase RTDB
- */
 export interface StreamStateData {
     isLive: boolean;
     lastOfflineTimestamp: number | null;
     lastUpdated: number;
 }
 
-/**
- * Get reference to a stream's state in Firebase RTDB
- */
 export const getStreamStateRef = (streamId: string) => {
     return ref(database, `streams/${streamId}`);
 };
 
-/**
- * Subscribe to real-time updates for a stream's state
- * Returns unsubscribe function
- */
 export const subscribeToStreamState = (
     streamId: string,
     callback: (data: StreamStateData | null) => void,
@@ -41,10 +31,6 @@ export const subscribeToStreamState = (
     );
 };
 
-/**
- * Initialize stream state if it doesn't exist
- * Returns true if created, false if already exists
- */
 export const initializeStreamState = async (
     streamId: string,
     initialIsLive: boolean = false
@@ -55,7 +41,6 @@ export const initializeStreamState = async (
         const snapshot = await get(streamRef);
 
         if (!snapshot.exists()) {
-            // Create initial state
             await set(streamRef, {
                 isLive: initialIsLive,
                 lastOfflineTimestamp: initialIsLive ? null : Date.now(),
@@ -72,9 +57,6 @@ export const initializeStreamState = async (
     }
 };
 
-/**
- * Update stream state to offline
- */
 export const setStreamOffline = async (streamId: string): Promise<void> => {
     const streamRef = getStreamStateRef(streamId);
 
@@ -90,9 +72,6 @@ export const setStreamOffline = async (streamId: string): Promise<void> => {
     }
 };
 
-/**
- * Update stream state to live
- */
 export const setStreamLive = async (streamId: string): Promise<void> => {
     const streamRef = getStreamStateRef(streamId);
 
@@ -108,9 +87,6 @@ export const setStreamLive = async (streamId: string): Promise<void> => {
     }
 };
 
-/**
- * Update full stream state
- */
 export const updateStreamState = async (
     streamId: string,
     data: Partial<StreamStateData>
