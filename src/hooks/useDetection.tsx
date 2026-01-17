@@ -1,4 +1,4 @@
-
+import { detectionEndpointService } from "../services/api/detection";
 import { useEffect, useRef, useCallback } from "react";
 
 export interface Detection {
@@ -47,9 +47,9 @@ const isValidPlantId = (id: unknown): id is number => {
 
 const validateDetectionMessage = (msg: unknown): msg is DetectionMessage => {
   if (!msg || typeof msg !== "object") return false;
-  
+
   const m = msg as Record<string, unknown>;
-  
+
   return (
     isValidBbox(m.bbox) &&
     typeof m.cls === "string" &&
@@ -59,16 +59,14 @@ const validateDetectionMessage = (msg: unknown): msg is DetectionMessage => {
 };
 
 interface UseDetectionOptions {
-  wsUrl?: string;
   maxDetections?: number;
   detectionTimeout?: number;
 }
 
 export const useDetection = (options: UseDetectionOptions = {}) => {
-  const { 
-    wsUrl = "ws://localhost:9001", 
+  const {
     maxDetections = 6,
-    detectionTimeout = 1000 
+    detectionTimeout = 1000
   } = options;
 
   const detectionsRef = useRef<Detection[]>([]);
@@ -85,7 +83,7 @@ export const useDetection = (options: UseDetectionOptions = {}) => {
     timeoutRef.current = window.setTimeout(() => {
       const now = Date.now();
       const elapsed = now - lastUpdateTimeRef.current;
-      
+
       if (elapsed >= detectionTimeout) {
         console.log("[useDetection] Auto-clearing stale detections");
         detectionsRef.current = [];
@@ -94,134 +92,173 @@ export const useDetection = (options: UseDetectionOptions = {}) => {
   }, [detectionTimeout]);
 
   useEffect(() => {
-    let validatedWsUrl: string;
-    try {
-      const url = new URL(wsUrl);
-      if (url.protocol !== "ws:" && url.protocol !== "wss:") {
-        throw new Error("Invalid WebSocket protocol");
-      }
-      validatedWsUrl = url.toString();
-    } catch (err) {
-      console.error("[useDetection] Invalid WebSocket URL:", err);
-      return;
-    }
+    let ws: WebSocket | null = null;
+    let reconnectTimeoutId: number | null = null;
+    let isMounted = true;
 
-    const ws = new WebSocket(validatedWsUrl);
-    wsRef.current = ws;
+    const connect = async () => {
+      if (!isMounted) return;
 
-    ws.onopen = () => {
-      console.log("[useDetection] WebSocket connected");
-    };
-
-    ws.onmessage = (ev) => {
       try {
-        if (ev.data.length > 100000) {
-          console.error("[useDetection] Message too large, ignoring");
+        console.log("[useDetection] Fetching detection config...");
+        const config = await detectionEndpointService.getConfig();
+
+        if (!isMounted) return;
+
+        const { url, token } = config;
+        const wsUrl = `${url}?token=${token}`;
+
+        // Validate protocol
+        try {
+          const parsedUrl = new URL(url);
+          if (parsedUrl.protocol !== "ws:" && parsedUrl.protocol !== "wss:") {
+            throw new Error("Invalid WebSocket protocol");
+          }
+        } catch (err) {
+          console.error("[useDetection] Invalid WebSocket URL from config:", err);
+          if (isMounted) {
+            reconnectTimeoutId = window.setTimeout(connect, 5000);
+          }
           return;
         }
 
-        const msg = JSON.parse(ev.data);
-        const now = Date.now();
-        
-        if (!msg.type || typeof msg.type !== "string") {
-          console.warn("[useDetection] Invalid message type");
-          return;
-        }
-        
-        if (msg.type === "wide_batch") {
-          lastUpdateTimeRef.current = now;
-          
-          if (!msg.detections || !Array.isArray(msg.detections)) {
-            console.log("[useDetection] No detections - clearing");
-            detectionsRef.current = [];
-            scheduleDetectionCleanup();
-            return;
-          }
+        ws = new WebSocket(wsUrl);
+        wsRef.current = ws;
 
-          if (msg.detections.length > maxDetections * 2) {
-            console.warn("[useDetection] Too many detections, truncating");
-            msg.detections = msg.detections.slice(0, maxDetections * 2);
-          }
+        ws.onopen = () => {
+          console.log("[useDetection] WebSocket connected");
+        };
 
-          const currentPlantIds = new Set(
-            msg.detections
-              .map((d: unknown) => (d as Record<string, unknown>).plant_id)
-              .filter((id: unknown): id is number => isValidPlantId(id))
-          );
-
-          const healthKeys = Array.from(healthStatusRef.current.keys());
-          for (const plantId of healthKeys) {
-            if (!currentPlantIds.has(plantId)) {
-              healthStatusRef.current.delete(plantId);
+        ws.onmessage = (ev) => {
+          try {
+            if (ev.data.length > 100000) {
+              console.error("[useDetection] Message too large, ignoring");
+              return;
             }
-          }
 
-          detectionsRef.current = msg.detections
-            .filter(validateDetectionMessage)
-            .slice(0, maxDetections)
-            .map((d: DetectionMessage) => {
-              const plantId = isValidPlantId(d.plant_id) ? d.plant_id : 0;
-              const storedHealth = healthStatusRef.current.get(plantId);
-              
-              return {
-                x1: Math.max(0, Math.min(1, d.bbox[0])),
-                y1: Math.max(0, Math.min(1, d.bbox[1])),
-                x2: Math.max(0, Math.min(1, d.bbox[2])),
-                y2: Math.max(0, Math.min(1, d.bbox[3])),
-                cls: sanitizeString(d.cls),
-                conf: isValidConfidence(d.conf_det || d.conf) 
-                  ? (d.conf_det || d.conf || 0)
-                  : 0,
-                plant_id: plantId,
-                health: sanitizeString(
-                  storedHealth || d.health || "unknown"
-                ),
-                timestamp: now,
-              };
-            });
-          
-          scheduleDetectionCleanup();
-        }
-        
-        else if (msg.type === "classify") {
-          if (!isValidPlantId(msg.plant_id)) {
-            console.warn("[useDetection] Invalid plant_id in classify message");
-            return;
-          }
+            const msg = JSON.parse(ev.data);
+            const now = Date.now();
 
-          const plantId = msg.plant_id;
-          const newHealth = sanitizeString(msg.health || msg.status || "unknown");
-          
-          healthStatusRef.current.set(plantId, newHealth);
-          
-          const det = detectionsRef.current.find(d => d.plant_id === plantId);
-          if (det) {
-            det.health = newHealth;
-            det.timestamp = now;
+            if (!msg.type || typeof msg.type !== "string") {
+              console.warn("[useDetection] Invalid message type");
+              return;
+            }
+
+            if (msg.type === "wide_batch") {
+              lastUpdateTimeRef.current = now;
+
+              if (!msg.detections || !Array.isArray(msg.detections)) {
+                console.log("[useDetection] No detections - clearing");
+                detectionsRef.current = [];
+                scheduleDetectionCleanup();
+                return;
+              }
+
+              if (msg.detections.length > maxDetections * 2) {
+                console.warn("[useDetection] Too many detections, truncating");
+                msg.detections = msg.detections.slice(0, maxDetections * 2);
+              }
+
+              const currentPlantIds = new Set(
+                msg.detections
+                  .map((d: unknown) => (d as Record<string, unknown>).plant_id)
+                  .filter((id: unknown): id is number => isValidPlantId(id))
+              );
+
+              const healthKeys = Array.from(healthStatusRef.current.keys());
+              for (const plantId of healthKeys) {
+                if (!currentPlantIds.has(plantId)) {
+                  healthStatusRef.current.delete(plantId);
+                }
+              }
+
+              detectionsRef.current = msg.detections
+                .filter(validateDetectionMessage)
+                .slice(0, maxDetections)
+                .map((d: DetectionMessage) => {
+                  const plantId = isValidPlantId(d.plant_id) ? d.plant_id : 0;
+                  const storedHealth = healthStatusRef.current.get(plantId);
+
+                  return {
+                    x1: Math.max(0, Math.min(1, d.bbox[0])),
+                    y1: Math.max(0, Math.min(1, d.bbox[1])),
+                    x2: Math.max(0, Math.min(1, d.bbox[2])),
+                    y2: Math.max(0, Math.min(1, d.bbox[3])),
+                    cls: sanitizeString(d.cls),
+                    conf: isValidConfidence(d.conf_det || d.conf)
+                      ? (d.conf_det || d.conf || 0)
+                      : 0,
+                    plant_id: plantId,
+                    health: sanitizeString(
+                      storedHealth || d.health || "unknown"
+                    ),
+                    timestamp: now,
+                  };
+                });
+
+              scheduleDetectionCleanup();
+            }
+
+            else if (msg.type === "classify") {
+              if (!isValidPlantId(msg.plant_id)) {
+                console.warn("[useDetection] Invalid plant_id in classify message");
+                return;
+              }
+
+              const plantId = msg.plant_id;
+              const newHealth = sanitizeString(msg.health || msg.status || "unknown");
+
+              healthStatusRef.current.set(plantId, newHealth);
+
+              const det = detectionsRef.current.find(d => d.plant_id === plantId);
+              if (det) {
+                det.health = newHealth;
+                det.timestamp = now;
+              }
+            }
+          } catch (err) {
+            console.error("[useDetection] Message error:", err);
           }
-        }
+        };
+
+        ws.onerror = (err) => {
+          console.error("[useDetection] WebSocket error:", err);
+        };
+
+        ws.onclose = () => {
+          console.log("[useDetection] WebSocket closed");
+          detectionsRef.current = [];
+          healthStatusRef.current.clear();
+          wsRef.current = null;
+
+          if (isMounted) {
+            reconnectTimeoutId = window.setTimeout(connect, 3000);
+          }
+        };
+
       } catch (err) {
-        console.error("[useDetection] Message error:", err);
+        console.error("[useDetection] Failed to connect:", err);
+        if (isMounted) {
+          reconnectTimeoutId = window.setTimeout(connect, 5000);
+        }
       }
     };
 
-    ws.onerror = (err) => {
-      console.error("[useDetection] WebSocket error:", err);
-    };
-
-    ws.onclose = () => {
-      detectionsRef.current = [];
-      healthStatusRef.current.clear();
-    };
+    connect();
 
     return () => {
+      isMounted = false;
+      if (reconnectTimeoutId) {
+        clearTimeout(reconnectTimeoutId);
+      }
+      if (ws) {
+        ws.close();
+      }
       if (timeoutRef.current) {
         clearTimeout(timeoutRef.current);
       }
-      ws.close();
-      wsRef.current = null;
     };
-  }, [wsUrl, maxDetections, detectionTimeout, scheduleDetectionCleanup]);
+  }, [maxDetections, detectionTimeout, scheduleDetectionCleanup]);
 
   const clearDetections = () => {
     detectionsRef.current = [];

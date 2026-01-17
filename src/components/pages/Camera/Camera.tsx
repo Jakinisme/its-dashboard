@@ -28,10 +28,6 @@ const Camera = () => {
     { time: "13:25", activity: "Tanaman dalam keadaan sehat" },
   ]
 
-
-
-
-
   return (
     <main className={styles.main}>
       <section className={styles.header}>
