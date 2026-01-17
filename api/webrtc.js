@@ -1,21 +1,17 @@
-// api/webrtc.js
+
 import crypto from 'crypto';
 
 export default function handler(req, res) {
   try {
-    // Get origin from request
     const origin = req.headers.origin;
 
-    // Parse allowed origins from environment variable or use defaults
     const allowedOriginsEnv = process.env.ALLOWED_ORIGINS || '';
     const allowedOrigins = allowedOriginsEnv
       ? allowedOriginsEnv.split(',').map(o => o.trim())
       : ['http://localhost:5173'];
 
-    // Check if origin is allowed
     const isAllowedOrigin = allowedOrigins.includes(origin);
 
-    // Set CORS headers - IMPORTANT: Set origin dynamically, not wildcard
     if (isAllowedOrigin) {
       res.setHeader('Access-Control-Allow-Origin', origin);
       res.setHeader('Access-Control-Allow-Credentials', 'true');
@@ -23,12 +19,10 @@ export default function handler(req, res) {
     res.setHeader('Access-Control-Allow-Methods', 'POST,OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
 
-    // Handle preflight OPTIONS request
     if (req.method === 'OPTIONS') {
       return res.status(200).end();
     }
 
-    // Validate origin before processing request
     if (!isAllowedOrigin) {
       return res.status(403).json({
         error: 'Forbidden',
@@ -36,7 +30,6 @@ export default function handler(req, res) {
       });
     }
 
-    // Only allow POST requests
     if (req.method !== 'POST') {
       return res.status(405).json({
         error: 'Method Not Allowed',
@@ -44,9 +37,7 @@ export default function handler(req, res) {
       });
     }
 
-    // Validate required environment variables
     const secret = process.env.SECRET_TOKEN;
-    const wssEndpoint = process.env.WSS_ENDPOINT;
     const streamEndpoint = process.env.WEBRTC_ENDPOINT;
 
     if (!secret) {
@@ -54,14 +45,6 @@ export default function handler(req, res) {
       return res.status(500).json({
         error: 'Server Configuration Error',
         message: 'Server is not properly configured'
-      });
-    }
-
-    if (!wssEndpoint) {
-      console.error('WSS_ENDPOINT environment variable is not set');
-      return res.status(500).json({
-        error: 'Server Configuration Error',
-        message: 'WebSocket endpoint is not configured'
       });
     }
 
@@ -73,9 +56,8 @@ export default function handler(req, res) {
       });
     }
 
-    // Generate temporary token
     const timestamp = Date.now();
-    const expires = timestamp + (5 * 60 * 1000); // 5 minutes
+    const expires = timestamp + (5 * 60 * 1000);
 
     const token = crypto
       .createHmac('sha256', secret)
@@ -88,18 +70,13 @@ export default function handler(req, res) {
       expires
     })).toString('base64');
 
-    // Return both endpoints
     return res.status(200).json({
-      wss: {
-        url: wssEndpoint,
-        token: wsToken
-      },
       stream: {
         url: streamEndpoint,
         token: wsToken
       },
       expiresAt: expires,
-      expiresIn: 300 // seconds
+      expiresIn: 300
     });
 
   } catch (error) {

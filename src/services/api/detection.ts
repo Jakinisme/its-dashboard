@@ -1,4 +1,4 @@
-// src/services/detectionEndpoint.ts
+
 interface DetectionConfig {
   url: string;
   token: string;
@@ -10,12 +10,10 @@ class DetectionEndpointService {
   private fetchPromise: Promise<DetectionConfig> | null = null;
 
   async getConfig(): Promise<DetectionConfig> {
-    // Check cache & expiry
-    if (this.config && this.config.expiresAt > Date.now() + 60000) { // 1 min buffer
+    if (this.config && this.config.expiresAt > Date.now() + 60000) {
       return this.config;
     }
 
-    // Prevent multiple simultaneous fetches
     if (this.fetchPromise) {
       return this.fetchPromise;
     }
