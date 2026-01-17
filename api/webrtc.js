@@ -1,5 +1,5 @@
 // api/webrtc.js
-const crypto = require('crypto');
+import crypto from 'crypto';
 
 export default function handler(req, res) {
   try {
