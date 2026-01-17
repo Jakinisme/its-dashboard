@@ -9,15 +9,14 @@ const VideoFeed = () => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
-  // Detection WebSocket hook
+  // Detection hook - uses serverless endpoint automatically
   const { detectionsRef, clearDetections } = useDetection({
-    wsUrl: import.meta.env.VITE_FALLBACK_WS || "wss://localhost:9001",
-    maxDetections: 9,
+    maxDetections: 6,
+    detectionTimeout: 1000,
   });
 
   // WebRTC WHEP connection hook
   useWebRTC(videoRef, {
-    metamtxHost: import.meta.env.VITE_FALLBACK_METAMTX || "localhost:8889",
     streamName: "camera",
     reconnectDelay: 3000,
     onConnected: () => {

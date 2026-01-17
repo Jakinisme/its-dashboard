@@ -1,9 +1,8 @@
-
 import { useEffect, useRef } from "react";
 import { useLive } from "./useLive";
+import { webrtcService } from "../services/api/webrtc";
 
 interface UseWebRTCOptions {
-  metamtxHost?: string;
   streamName?: string;
   reconnectDelay?: number;
   onConnected?: () => void;
@@ -14,10 +13,9 @@ export const useWebRTC = (
   videoRef: React.RefObject<HTMLVideoElement | null>,
   options: UseWebRTCOptions = {}
 ) => {
-  const {setIsLive} = useLive();
+  const { setIsLive } = useLive();
 
   const {
-    metamtxHost = "localhost:8889",
     streamName = "camera",
     reconnectDelay = 3000,
     onConnected,
@@ -25,6 +23,7 @@ export const useWebRTC = (
   } = options;
 
   const pcRef = useRef<RTCPeerConnection | null>(null);
+  const configRef = useRef<{ streamUrl: string; token: string } | null>(null);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -50,6 +49,18 @@ export const useWebRTC = (
     const start = async () => {
       try {
         cleanupPC();
+
+        // Initialize WebRTC service and get credentials
+        console.log("[useWebRTC] Initializing WebRTC service...");
+        const config = await webrtcService.initialize();
+
+        // Store config for potential refresh
+        configRef.current = {
+          streamUrl: config.stream.url,
+          token: config.stream.token
+        };
+
+        console.log("[useWebRTC] Got stream endpoint:", config.stream.url);
 
         pc = new RTCPeerConnection({
           iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
@@ -97,23 +108,39 @@ export const useWebRTC = (
           setTimeout(resolve, 2000);
         });
 
-        // WHEP negotiation
-        const url = `https://${metamtxHost}/${streamName}/whep`;
-        const res = await fetch(url, {
+        // WHEP negotiation with authenticated endpoint
+        const whepUrl = `https://${config.stream.url}/${streamName}/whep`;
+        console.log("[useWebRTC] Connecting to WHEP endpoint:", whepUrl);
+
+        const res = await fetch(whepUrl, {
           method: "POST",
-          headers: { "Content-Type": "application/sdp" },
+          headers: {
+            "Content-Type": "application/sdp",
+            "Authorization": `Bearer ${config.stream.token}`
+          },
           body: pc.localDescription?.sdp,
         });
 
-        if (!res.ok) throw new Error(`WHEP failed ${res.status}`);
+        if (!res.ok) {
+          const errorText = await res.text();
+          throw new Error(`WHEP failed ${res.status}: ${errorText}`);
+        }
 
         const answerSdp = await res.text();
         await pc.setRemoteDescription({ type: "answer", sdp: answerSdp });
 
         console.log("[useWebRTC] WHEP negotiation complete");
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (err) {
         console.error("[useWebRTC] Start failed:", err);
         cleanupPC();
+
+        // Check if config is expiring and refresh if needed
+        if (configRef.current && webrtcService.isExpiring(120)) {
+          console.log("[useWebRTC] Config expiring, will refresh on retry");
+          configRef.current = null;
+        }
+
         if (!stopped) {
           setTimeout(start, reconnectDelay);
         }
@@ -126,7 +153,7 @@ export const useWebRTC = (
       stopped = true;
       cleanupPC();
     };
-  }, [videoRef, metamtxHost, streamName, reconnectDelay, onConnected, onDisconnected, setIsLive]);
+  }, [videoRef, streamName, reconnectDelay, onConnected, onDisconnected, setIsLive]);
 
   return {
     pcRef,
