@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useLive } from "./useLive";
 import { webrtcService } from "../services/api/webrtc";
 
@@ -8,6 +8,8 @@ interface UseWebRTCOptions {
   onConnected?: () => void;
   onDisconnected?: () => void;
 }
+
+const RETRY_INTERVALS = [5000, 10000, 10000];
 
 export const useWebRTC = (
   videoRef: React.RefObject<HTMLVideoElement | null>,
@@ -22,9 +24,20 @@ export const useWebRTC = (
     onDisconnected,
   } = options;
 
+  const [status, setStatus] = useState<'connecting' | 'connected' | 'failed'>('connecting');
+  const [retryCount, setRetryCount] = useState(0);
+
   const pcRef = useRef<RTCPeerConnection | null>(null);
   const configRef = useRef<{ streamUrl: string; token: string } | null>(null);
-  const retryDelayRef = useRef<number>(reconnectDelay);
+
+  const onConnectedRef = useRef(onConnected);
+  const onDisconnectedRef = useRef(onDisconnected);
+  const retryCountRef = useRef(0);
+
+  useEffect(() => {
+    onConnectedRef.current = onConnected;
+    onDisconnectedRef.current = onDisconnected;
+  }, [onConnected, onDisconnected]);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -32,6 +45,7 @@ export const useWebRTC = (
 
     let pc: RTCPeerConnection | null = null;
     let stopped = false;
+    let retryTimeoutId: number | null = null;
 
     const cleanupPC = () => {
       if (pc) {
@@ -48,20 +62,24 @@ export const useWebRTC = (
     };
 
     const start = async () => {
+      if (retryCountRef.current > 2) {
+        // console.log("[useWebRTC] Max retries exceeded. Stopping.");
+        setStatus('failed');
+        return;
+      }
+
+      setStatus((prev) => prev === 'failed' ? 'failed' : 'connecting');
+
       try {
         cleanupPC();
 
-        // Initialize WebRTC service and get credentials
-        console.log("[useWebRTC] Initializing WebRTC service...");
+        // console.log(`[useWebRTC] Connecting... Attempt ${retryCountRef.current + 1}/3`);
         const config = await webrtcService.initialize();
 
-        // Store config for potential refresh
         configRef.current = {
           streamUrl: config.stream.url,
           token: config.stream.token
         };
-
-        console.log("[useWebRTC] Got stream endpoint:", config.stream.url);
 
         pc = new RTCPeerConnection({
           iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
@@ -76,17 +94,26 @@ export const useWebRTC = (
 
         pc.oniceconnectionstatechange = () => {
           const state = pc?.iceConnectionState;
-          console.log("[useWebRTC] ICE state:", state);
+          // console.log("[useWebRTC] ICE state:", state);
 
           if (state === "connected") {
-            console.log("[useWebRTC] WebRTC connected");
-            retryDelayRef.current = reconnectDelay; // Reset backoff
+            // console.log("[useWebRTC] WebRTC connected");
+            setStatus('connected');
+            retryCountRef.current = 0; // Reset retries on success
+            setRetryCount(0);
             setIsLive(true);
-            onConnected?.();
+            onConnectedRef.current?.();
           } else if (state === "disconnected" || state === "failed") {
-            console.log("[useWebRTC] WebRTC disconnected/failed");
-            setIsLive(false);
-            onDisconnected?.();
+            // console.log("[useWebRTC] WebRTC disconnected/failed");
+
+            // Only trigger retry logic if we haven't manually stopped
+            if (!stopped) {
+              // Determine if we should count this as a retry (e.g. if it was previously connected)
+              // For simplicity, any disconnect triggers the retry logic from scratch
+              setIsLive(false);
+              onDisconnectedRef.current?.();
+              handleRetry();
+            }
           }
         };
 
@@ -95,7 +122,6 @@ export const useWebRTC = (
         const offer = await pc.createOffer();
         await pc.setLocalDescription(offer);
 
-        // Wait for ICE gathering
         await new Promise<void>((resolve) => {
           if (pc?.iceGatheringState === "complete") return resolve();
 
@@ -110,9 +136,8 @@ export const useWebRTC = (
           setTimeout(resolve, 2000);
         });
 
-        // WHEP negotiation with authenticated endpoint
         const whepUrl = `https://${config.stream.url}/${streamName}/whep`;
-        console.log("[useWebRTC] Connecting to WHEP endpoint:", whepUrl);
+        // console.log("[useWebRTC] Connecting to WHEP endpoint:", whepUrl);
 
         const res = await fetch(whepUrl, {
           method: "POST",
@@ -131,24 +156,34 @@ export const useWebRTC = (
         const answerSdp = await res.text();
         await pc.setRemoteDescription({ type: "answer", sdp: answerSdp });
 
-        console.log("[useWebRTC] WHEP negotiation complete");
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      } catch (err) {
-        //console.error("[useWebRTC] Start failed:", err);
+        // console.log("[useWebRTC] WHEP negotiation complete");
+
+      } catch {
+        // console.error("[useWebRTC] Connection error:", err);
         cleanupPC();
+        handleRetry();
+      }
+    };
 
-        // Check if config is expiring and refresh if needed
-        if (configRef.current && webrtcService.isExpiring(120)) {
-          console.log("[useWebRTC] Config expiring, will refresh on retry");
-          configRef.current = null;
-        }
+    const handleRetry = () => {
+      if (stopped) return;
 
-        if (!stopped) {
-          const nextDelay = Math.min(retryDelayRef.current * 2, 30000);
-          retryDelayRef.current = nextDelay;
-          console.log(`[useWebRTC] Retrying in ${nextDelay}ms`);
-          setTimeout(start, nextDelay);
-        }
+      const MAX_RETRIES_ALLOWED = 2;
+
+      if (retryCountRef.current < MAX_RETRIES_ALLOWED) {
+        const delay = RETRY_INTERVALS[retryCountRef.current] || 10000;
+        const nextRetryCount = retryCountRef.current + 1;
+
+        console.log(`[useWebRTC] Retrying in ${delay}ms... (Preparing for Attempt ${nextRetryCount + 1})`);
+
+        retryCountRef.current = nextRetryCount;
+        setRetryCount(retryCountRef.current);
+
+        if (retryTimeoutId) clearTimeout(retryTimeoutId);
+        retryTimeoutId = window.setTimeout(start, delay);
+      } else {
+        // console.log("[useWebRTC] Max attempts reached. Giving up.");
+        setStatus('failed');
       }
     };
 
@@ -157,10 +192,13 @@ export const useWebRTC = (
     return () => {
       stopped = true;
       cleanupPC();
+      if (retryTimeoutId) clearTimeout(retryTimeoutId);
     };
-  }, [videoRef, streamName, reconnectDelay, onConnected, onDisconnected, setIsLive]);
+  }, [videoRef, streamName, reconnectDelay, setIsLive]);
 
   return {
-    pcRef,
+    pcRef: pcRef,
+    status,
+    retryCount
   };
 };
