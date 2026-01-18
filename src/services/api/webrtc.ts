@@ -12,8 +12,16 @@ export interface WebRTCConfig {
 
 class WebRTCService {
     private config: WebRTCConfig | null = null;
+    private lastFetchTime: number = 0;
+    private readonly THROTTLE_MS = 2000;
 
     async initialize(): Promise<WebRTCConfig> {
+        const now = Date.now();
+        if (now - this.lastFetchTime < this.THROTTLE_MS) {
+            throw new Error('Rate limit exceeded: Please wait before retrying WebRTC config');
+        }
+        this.lastFetchTime = now;
+
         try {
             const response = await fetch('/api/webrtc', {
                 method: 'POST',

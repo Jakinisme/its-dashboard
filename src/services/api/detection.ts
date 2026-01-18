@@ -8,6 +8,8 @@ interface DetectionConfig {
 class DetectionEndpointService {
   private config: DetectionConfig | null = null;
   private fetchPromise: Promise<DetectionConfig> | null = null;
+  private lastFetchTime: number = 0;
+  private readonly THROTTLE_MS = 2000;
 
   async getConfig(): Promise<DetectionConfig> {
     if (this.config && this.config.expiresAt > Date.now() + 60000) {
@@ -19,7 +21,7 @@ class DetectionEndpointService {
     }
 
     this.fetchPromise = this.fetchEndpoint();
-    
+
     try {
       this.config = await this.fetchPromise;
       return this.config;
@@ -29,8 +31,14 @@ class DetectionEndpointService {
   }
 
   private async fetchEndpoint(): Promise<DetectionConfig> {
+    const now = Date.now();
+    if (now - this.lastFetchTime < this.THROTTLE_MS) {
+      throw new Error('Rate limit exceeded: Please wait before retrying detection config');
+    }
+    this.lastFetchTime = now;
+
     console.log('[DetectionService] Fetching endpoint...');
-    
+
     const response = await fetch('/api/detection', {
       method: 'POST',
       headers: {
@@ -44,7 +52,7 @@ class DetectionEndpointService {
 
     const data = await response.json();
     console.log('[DetectionService] Endpoint received, expires at:', new Date(data.expiresAt));
-    
+
     return data;
   }
 

@@ -74,6 +74,7 @@ export const useDetection = (options: UseDetectionOptions = {}) => {
   const wsRef = useRef<WebSocket | null>(null);
   const lastUpdateTimeRef = useRef<number>(Date.now());
   const timeoutRef = useRef<number | null>(null);
+  const retryDelayRef = useRef<number>(2000); // Start at 2s
 
   const scheduleDetectionCleanup = useCallback(() => {
     if (timeoutRef.current) {
@@ -127,6 +128,7 @@ export const useDetection = (options: UseDetectionOptions = {}) => {
 
         ws.onopen = () => {
           console.log("[useDetection] WebSocket connected");
+          retryDelayRef.current = 2000; // Reset backoff on success
         };
 
         ws.onmessage = (ev) => {
@@ -238,8 +240,12 @@ export const useDetection = (options: UseDetectionOptions = {}) => {
 
       } catch (err) {
         console.error("[useDetection] Failed to connect:", err);
+        // Exponential backoff
         if (isMounted) {
-          reconnectTimeoutId = window.setTimeout(connect, 5000);
+          const nextDelay = Math.min(retryDelayRef.current * 2, 30000);
+          retryDelayRef.current = nextDelay;
+          console.log(`[useDetection] Retrying in ${nextDelay}ms...`);
+          reconnectTimeoutId = window.setTimeout(connect, nextDelay);
         }
       }
     };

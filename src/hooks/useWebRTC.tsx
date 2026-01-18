@@ -24,6 +24,7 @@ export const useWebRTC = (
 
   const pcRef = useRef<RTCPeerConnection | null>(null);
   const configRef = useRef<{ streamUrl: string; token: string } | null>(null);
+  const retryDelayRef = useRef<number>(reconnectDelay);
 
   useEffect(() => {
     const video = videoRef.current;
@@ -79,6 +80,7 @@ export const useWebRTC = (
 
           if (state === "connected") {
             console.log("[useWebRTC] WebRTC connected");
+            retryDelayRef.current = reconnectDelay; // Reset backoff
             setIsLive(true);
             onConnected?.();
           } else if (state === "disconnected" || state === "failed") {
@@ -132,7 +134,7 @@ export const useWebRTC = (
         console.log("[useWebRTC] WHEP negotiation complete");
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
       } catch (err) {
-       //console.error("[useWebRTC] Start failed:", err);
+        //console.error("[useWebRTC] Start failed:", err);
         cleanupPC();
 
         // Check if config is expiring and refresh if needed
@@ -142,7 +144,10 @@ export const useWebRTC = (
         }
 
         if (!stopped) {
-          setTimeout(start, reconnectDelay);
+          const nextDelay = Math.min(retryDelayRef.current * 2, 30000);
+          retryDelayRef.current = nextDelay;
+          console.log(`[useWebRTC] Retrying in ${nextDelay}ms`);
+          setTimeout(start, nextDelay);
         }
       }
     };
