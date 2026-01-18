@@ -112,7 +112,7 @@ export const useDetection = (options: UseDetectionOptions = {}) => {
         if (!isMounted) return;
 
         const { url, token } = config;
-        const wsUrl = `${url}?token=${token}`;
+        const wsUrl = url;
 
         // Validate protocol
         try {
@@ -128,7 +128,7 @@ export const useDetection = (options: UseDetectionOptions = {}) => {
           return;
         }
 
-        ws = new WebSocket(wsUrl);
+        ws = new WebSocket(wsUrl, token);
         wsRef.current = ws;
 
         ws.onopen = () => {
