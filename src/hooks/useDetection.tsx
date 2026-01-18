@@ -140,7 +140,7 @@ export const useDetection = (options: UseDetectionOptions = {}) => {
         ws.onmessage = (ev) => {
           try {
             if (ev.data.length > 100000) {
-              // console.error("[useDetection] Message too large, ignoring");
+              // console.error("[useDetection] Message too large, ignoringa");
               return;
             }
 
