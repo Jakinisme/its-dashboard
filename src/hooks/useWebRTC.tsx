@@ -63,7 +63,7 @@ export const useWebRTC = (
 
     const start = async () => {
       if (retryCountRef.current > 2) {
-        // console.log("[useWebRTC] Max retries exceeded. Stopping.");
+        console.log("[useWebRTC] Max retries exceeded. Stopping.");
         setStatus('failed');
         return;
       }
@@ -73,7 +73,7 @@ export const useWebRTC = (
       try {
         cleanupPC();
 
-        // console.log(`[useWebRTC] Connecting... Attempt ${retryCountRef.current + 1}/3`);
+        console.log(`[useWebRTC] Connecting... Attempt ${retryCountRef.current + 1}/3`);
         const config = await webrtcService.initialize();
 
         configRef.current = {
@@ -94,22 +94,19 @@ export const useWebRTC = (
 
         pc.oniceconnectionstatechange = () => {
           const state = pc?.iceConnectionState;
-          // console.log("[useWebRTC] ICE state:", state);
+          console.log("[useWebRTC] ICE state:", state);
 
           if (state === "connected") {
-            // console.log("[useWebRTC] WebRTC connected");
+            console.log("[useWebRTC] ✓ WebRTC connected");
             setStatus('connected');
-            retryCountRef.current = 0; // Reset retries on success
+            retryCountRef.current = 0;
             setRetryCount(0);
             setIsLive(true);
             onConnectedRef.current?.();
           } else if (state === "disconnected" || state === "failed") {
-            // console.log("[useWebRTC] WebRTC disconnected/failed");
+            console.log("[useWebRTC] WebRTC disconnected/failed");
 
-            // Only trigger retry logic if we haven't manually stopped
             if (!stopped) {
-              // Determine if we should count this as a retry (e.g. if it was previously connected)
-              // For simplicity, any disconnect triggers the retry logic from scratch
               setIsLive(false);
               onDisconnectedRef.current?.();
               handleRetry();
@@ -137,7 +134,7 @@ export const useWebRTC = (
         });
 
         const whepUrl = `https://${config.stream.url}/${streamName}/whep`;
-        // console.log("[useWebRTC] Connecting to WHEP endpoint:", whepUrl);
+        console.log("[useWebRTC] Connecting to WHEP endpoint:", whepUrl);
 
         const res = await fetch(whepUrl, {
           method: "POST",
@@ -156,10 +153,10 @@ export const useWebRTC = (
         const answerSdp = await res.text();
         await pc.setRemoteDescription({ type: "answer", sdp: answerSdp });
 
-        // console.log("[useWebRTC] WHEP negotiation complete");
+        console.log("[useWebRTC] ✓ WHEP negotiation complete");
 
-      } catch {
-        // console.error("[useWebRTC] Connection error:", err);
+      } catch (err) {
+        console.error("[useWebRTC] Connection error:", err);
         cleanupPC();
         handleRetry();
       }
@@ -182,7 +179,7 @@ export const useWebRTC = (
         if (retryTimeoutId) clearTimeout(retryTimeoutId);
         retryTimeoutId = window.setTimeout(start, delay);
       } else {
-        // console.log("[useWebRTC] Max attempts reached. Giving up.");
+        console.log("[useWebRTC] Max attempts reached. Giving up.");
         setStatus('failed');
       }
     };
