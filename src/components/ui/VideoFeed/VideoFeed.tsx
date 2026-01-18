@@ -5,8 +5,6 @@ import { useCanvas } from "../../../hooks/useCanvas";
 
 import styles from "./Video.module.css";
 
-import Loading from "../Loading/Loading";
-
 const VideoFeed = () => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -18,7 +16,7 @@ const VideoFeed = () => {
   });
 
   // WebRTC WHEP connection hook
-  const { status: connectionStatus, retryCount } = useWebRTC(videoRef, {
+  useWebRTC(videoRef, {
     streamName: "camera",
     reconnectDelay: 3000,
     onConnected: () => {
@@ -40,27 +38,9 @@ const VideoFeed = () => {
   });
 
   return (
-    <div className={styles.container}>
-      {connectionStatus === "connecting" && (
-        <div className={styles.overlay}>
-          <Loading text={`Connecting... (Attempt ${retryCount + 1}/3)`} />
-        </div>
-      )}
-
-      {connectionStatus === "failed" && (
-        <div className={styles.overlay}>
-          <div className={styles.errorBox}>
-            <p>Connection Failed</p>
-            <button
-              onClick={() => window.location.reload()}
-              className={styles.reloadButton}
-            >
-              Reload Page
-            </button>
-          </div>
-        </div>
-      )}
-
+    <div
+      className={styles.container}
+    >
       <video
         ref={videoRef}
         autoPlay

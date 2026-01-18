@@ -63,8 +63,6 @@ interface UseDetectionOptions {
   detectionTimeout?: number;
 }
 
-const RETRY_INTERVALS = [5000, 10000, 10000];
-
 export const useDetection = (options: UseDetectionOptions = {}) => {
   const {
     maxDetections = 6,
@@ -76,7 +74,7 @@ export const useDetection = (options: UseDetectionOptions = {}) => {
   const wsRef = useRef<WebSocket | null>(null);
   const lastUpdateTimeRef = useRef<number>(Date.now());
   const timeoutRef = useRef<number | null>(null);
-  const retryCountRef = useRef<number>(0);
+  const retryDelayRef = useRef<number>(2000); // Start at 2s
 
   const scheduleDetectionCleanup = useCallback(() => {
     if (timeoutRef.current) {
@@ -103,20 +101,22 @@ export const useDetection = (options: UseDetectionOptions = {}) => {
       if (!isMounted) return;
 
       try {
-        const user = auth.currentUser;
-        if (!user) {
-          console.error("[useDetection] No authenticated user - waiting for auth");
-          if (isMounted) {
-            reconnectTimeoutId = window.setTimeout(connect, 5000);
-          }
-          return;
-        }
+        console.log("[useDetection] Fetching detection config...");
+        const config = await detectionEndpointService.getConfig();
 
-        console.log("[useDetection] Getting Firebase ID token...");
-        const idToken = await user.getIdToken(false);
-        
-        if (!idToken) {
-          console.error("[useDetection] Failed to get ID token");
+        if (!isMounted) return;
+
+        const { url, token } = config;
+        const wsUrl = `${url}?token=${token}`;
+
+        // Validate protocol
+        try {
+          const parsedUrl = new URL(url);
+          if (parsedUrl.protocol !== "ws:" && parsedUrl.protocol !== "wss:") {
+            throw new Error("Invalid WebSocket protocol");
+          }
+        } catch (err) {
+          console.error("[useDetection] Invalid WebSocket URL from config:", err);
           if (isMounted) {
             reconnectTimeoutId = window.setTimeout(connect, 5000);
           }
@@ -132,8 +132,8 @@ export const useDetection = (options: UseDetectionOptions = {}) => {
         wsRef.current = ws;
 
         ws.onopen = () => {
-          console.log("[useDetection] ✓ WebSocket connected");
-          retryCountRef.current = 0;
+          console.log("[useDetection] WebSocket connected");
+          retryDelayRef.current = 2000; // Reset backoff on success
         };
 
         ws.onmessage = (ev) => {
@@ -148,11 +148,6 @@ export const useDetection = (options: UseDetectionOptions = {}) => {
 
             if (!msg.type || typeof msg.type !== "string") {
               console.warn("[useDetection] Invalid message type");
-              return;
-            }
-
-            if (msg.type === "auth_success") {
-              console.log(`[useDetection] ✓ Authenticated as: ${msg.email || msg.uid}`);
               return;
             }
 
@@ -228,27 +223,17 @@ export const useDetection = (options: UseDetectionOptions = {}) => {
                 det.timestamp = now;
               }
             }
-
-            else if (msg.type === "error") {
-              console.error("[useDetection] Server error:", msg.message);
-            }
-
           } catch (err) {
-            console.error("[useDetection] Message parsing error:", err);
+            console.error("[useDetection] Message error:", err);
           }
         };
 
-        ws.onerror = (event) => {
-          console.error("[useDetection] WebSocket error:", event);
+        ws.onerror = (err) => {
+          console.error("[useDetection] WebSocket error:", err);
         };
 
-        ws.onclose = (event) => {
-          console.log(`[useDetection] WebSocket closed: ${event.code} - ${event.reason}`);
-          
-          if (event.code === 1008) {
-            console.error("[useDetection] Authentication failed:", event.reason);
-          }
-          
+        ws.onclose = () => {
+          console.log("[useDetection] WebSocket closed");
           detectionsRef.current = [];
           healthStatusRef.current.clear();
           wsRef.current = null;
@@ -260,18 +245,13 @@ export const useDetection = (options: UseDetectionOptions = {}) => {
         };
 
       } catch (err) {
-        console.error("[useDetection] Connection error:", err);
-
+        console.error("[useDetection] Failed to connect:", err);
+        // Exponential backoff
         if (isMounted) {
-          const currentRetry = retryCountRef.current;
-          if (currentRetry < 2) {
-            const delay = RETRY_INTERVALS[currentRetry] || 10000;
-            retryCountRef.current++;
-            console.log(`[useDetection] Retrying in ${delay}ms... (Attempt ${retryCountRef.current + 1}/3)`);
-            reconnectTimeoutId = window.setTimeout(connect, delay);
-          } else {
-            console.log("[useDetection] Max attempts reached");
-          }
+          const nextDelay = Math.min(retryDelayRef.current * 2, 30000);
+          retryDelayRef.current = nextDelay;
+          console.log(`[useDetection] Retrying in ${nextDelay}ms...`);
+          reconnectTimeoutId = window.setTimeout(connect, nextDelay);
         }
       }
     };
@@ -292,19 +272,18 @@ export const useDetection = (options: UseDetectionOptions = {}) => {
     };
   }, [maxDetections, detectionTimeout, scheduleDetectionCleanup]);
 
-  const clearDetections = useCallback(() => {
+  const clearDetections = () => {
     detectionsRef.current = [];
     healthStatusRef.current.clear();
     lastUpdateTimeRef.current = Date.now();
     if (timeoutRef.current) {
       clearTimeout(timeoutRef.current);
     }
-  }, []);
+  };
 
   return {
     detectionsRef,
     healthStatusRef,
     clearDetections,
-    retryCount: retryCountRef.current
   };
 };
