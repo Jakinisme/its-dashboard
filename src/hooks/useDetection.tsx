@@ -112,7 +112,7 @@ export const useDetection = (options: UseDetectionOptions = {}) => {
         if (!isMounted) return;
 
         const { url, token } = config;
-        
+
         // Validate protocol
         try {
           const parsedUrl = new URL(url);
@@ -151,18 +151,124 @@ export const useDetection = (options: UseDetectionOptions = {}) => {
               return;
             }
 
-            if (msg.type === "wide_batch") {
+            // Handle plants_batch from new backend
+            if (msg.type === "plants_batch") {
+              lastUpdateTimeRef.current = now;
+
+              if (!msg.plants || !Array.isArray(msg.plants)) {
+                // console.log("[useDetection] No plants - clearing");
+                detectionsRef.current = [];
+                scheduleDetectionCleanup();
+                return;
+              }
+
+              if (msg.plants.length === 0) {
+                detectionsRef.current = [];
+                scheduleDetectionCleanup();
+                return;
+              }
+
+              // Extract detections from plants array
+              const detections: Detection[] = [];
+
+              for (const plant of msg.plants) {
+                if (!plant.plant_bbox || !Array.isArray(plant.plant_bbox) || plant.plant_bbox.length !== 4) {
+                  continue;
+                }
+
+                const plantId = isValidPlantId(plant.plant_id) ? plant.plant_id : 0;
+                const bbox = plant.plant_bbox as [number, number, number, number];
+
+                // Update health status from plant data
+                if (plant.plant_status) {
+                  healthStatusRef.current.set(plantId, sanitizeString(plant.plant_status));
+                }
+
+                detections.push({
+                  x1: Math.max(0, Math.min(1, bbox[0])),
+                  y1: Math.max(0, Math.min(1, bbox[1])),
+                  x2: Math.max(0, Math.min(1, bbox[2])),
+                  y2: Math.max(0, Math.min(1, bbox[3])),
+                  cls: sanitizeString(plant.cls || "plant"),
+                  conf: isValidConfidence(plant.plant_conf) ? plant.plant_conf : 0,
+                  plant_id: plantId,
+                  health: sanitizeString(plant.plant_status || "unknown"),
+                  timestamp: now,
+                });
+              }
+
+              // Clean up stale health statuses
+              const currentPlantIds = new Set(detections.map(d => d.plant_id));
+              const healthKeys = Array.from(healthStatusRef.current.keys());
+              for (const plantId of healthKeys) {
+                if (!currentPlantIds.has(plantId)) {
+                  healthStatusRef.current.delete(plantId);
+                }
+              }
+
+              detectionsRef.current = detections.slice(0, maxDetections);
+              scheduleDetectionCleanup();
+            }
+
+            // Handle plant_with_leaves - update individual plant health
+            else if (msg.type === "plant_with_leaves") {
+              if (!isValidPlantId(msg.plant_id)) {
+                return;
+              }
+
+              const plantId = msg.plant_id;
+              const newHealth = sanitizeString(msg.plant_status || "unknown");
+              const bbox = msg.plant_bbox as [number, number, number, number] | undefined;
+
+              // Update health status
+              healthStatusRef.current.set(plantId, newHealth);
+
+              // Find and update existing detection
+              const det = detectionsRef.current.find(d => d.plant_id === plantId);
+              if (det) {
+                det.health = newHealth;
+                det.timestamp = now;
+                if (bbox && bbox.length === 4) {
+                  det.x1 = Math.max(0, Math.min(1, bbox[0]));
+                  det.y1 = Math.max(0, Math.min(1, bbox[1]));
+                  det.x2 = Math.max(0, Math.min(1, bbox[2]));
+                  det.y2 = Math.max(0, Math.min(1, bbox[3]));
+                }
+              } else if (bbox && bbox.length === 4) {
+                // Add new detection if not seen before
+                detectionsRef.current.push({
+                  x1: Math.max(0, Math.min(1, bbox[0])),
+                  y1: Math.max(0, Math.min(1, bbox[1])),
+                  x2: Math.max(0, Math.min(1, bbox[2])),
+                  y2: Math.max(0, Math.min(1, bbox[3])),
+                  cls: "plant",
+                  conf: isValidConfidence(msg.plant_conf) ? msg.plant_conf : 0,
+                  plant_id: plantId,
+                  health: newHealth,
+                  timestamp: now,
+                });
+
+                // Trim to max detections
+                if (detectionsRef.current.length > maxDetections) {
+                  detectionsRef.current = detectionsRef.current.slice(-maxDetections);
+                }
+              }
+
+              lastUpdateTimeRef.current = now;
+              scheduleDetectionCleanup();
+            }
+
+            // Legacy: Handle wide_batch format (backward compatibility)
+            else if (msg.type === "wide_batch") {
               lastUpdateTimeRef.current = now;
 
               if (!msg.detections || !Array.isArray(msg.detections)) {
-                // console.log("[useDetection] No detections - clearing");
                 detectionsRef.current = [];
                 scheduleDetectionCleanup();
                 return;
               }
 
               if (msg.detections.length > maxDetections * 2) {
-                // console.warn("[useDetection] Too many detections, truncating");
                 msg.detections = msg.detections.slice(0, maxDetections * 2);
               }
 
@@ -206,9 +312,9 @@ export const useDetection = (options: UseDetectionOptions = {}) => {
               scheduleDetectionCleanup();
             }
 
+            // Legacy: Handle classify format (backward compatibility)
             else if (msg.type === "classify") {
               if (!isValidPlantId(msg.plant_id)) {
-                // console.warn("[useDetection] Invalid plant_id in classify message");
                 return;
               }
 
