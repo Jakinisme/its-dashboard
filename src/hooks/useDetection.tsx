@@ -91,7 +91,7 @@ export const useDetection = (options: UseDetectionOptions = {}) => {
       const elapsed = now - lastUpdateTimeRef.current;
 
       if (elapsed >= detectionTimeout) {
-        // console.log("[useDetection] Auto-clearing stale detections");
+        console.log("[useDetection] Auto-clearing stale detections");
         detectionsRef.current = [];
       }
     }, detectionTimeout);
@@ -106,7 +106,7 @@ export const useDetection = (options: UseDetectionOptions = {}) => {
       if (!isMounted) return;
 
       try {
-        // console.log("[useDetection] Fetching detection config...");
+        console.log("[useDetection] Fetching detection config...");
         const config = await detectionEndpointService.getConfig();
 
         if (!isMounted) return;
@@ -119,8 +119,8 @@ export const useDetection = (options: UseDetectionOptions = {}) => {
           if (parsedUrl.protocol !== "ws:" && parsedUrl.protocol !== "wss:") {
             throw new Error("Invalid WebSocket protocol");
           }
-        } catch {
-          // console.error("[useDetection] Invalid WebSocket URL from config:", err);
+        } catch (err){
+          console.error("[useDetection] Invalid WebSocket URL from config:", err);
           if (isMounted) {
             reconnectTimeoutId = window.setTimeout(connect, 5000);
           }
@@ -140,7 +140,7 @@ export const useDetection = (options: UseDetectionOptions = {}) => {
         ws.onmessage = (ev) => {
           try {
             if (ev.data.length > 100000) {
-              // console.error("[useDetection] Message too large, ignoring");
+               console.error("[useDetection] Message too large, ignoring");
               return;
             }
 
@@ -148,7 +148,7 @@ export const useDetection = (options: UseDetectionOptions = {}) => {
             const now = Date.now();
 
             if (!msg.type || typeof msg.type !== "string") {
-              // console.warn("[useDetection] Invalid message type");
+               console.warn("[useDetection] Invalid message type");
               return;
             }
 
@@ -157,7 +157,7 @@ export const useDetection = (options: UseDetectionOptions = {}) => {
               lastUpdateTimeRef.current = now;
 
               if (!msg.plants || !Array.isArray(msg.plants)) {
-                // console.log("[useDetection] No plants - clearing");
+                console.log("[useDetection] No plants - clearing");
                 detectionsRef.current = [];
                 scheduleDetectionCleanup();
                 return;
@@ -330,17 +330,17 @@ export const useDetection = (options: UseDetectionOptions = {}) => {
                 det.timestamp = now;
               }
             }
-          } catch {
-            // console.error("[useDetection] Message error:", err);
+          } catch (err) {
+            console.error("[useDetection] Message error:", err);
           }
         };
 
-        ws.onerror = (/* err */) => {
-          // console.error("[useDetection] WebSocket error:", err);
+        ws.onerror = (err) => {
+          console.error("[useDetection] WebSocket error:", err);
         };
 
         ws.onclose = () => {
-          // console.log("[useDetection] WebSocket closed");
+          console.log("[useDetection] WebSocket closed");
           detectionsRef.current = [];
           healthStatusRef.current.clear();
           wsRef.current = null;
@@ -350,18 +350,18 @@ export const useDetection = (options: UseDetectionOptions = {}) => {
           }
         };
 
-      } catch {
-        // console.error("[useDetection] Failed to connect:", err);
+      } catch (err)  {
+        console.error("[useDetection] Failed to connect:", err);
 
         if (isMounted) {
           const currentRetry = retryCountRef.current;
           if (currentRetry < 2) { // Max 2 retries (3 attempts total)
             const delay = RETRY_INTERVALS[currentRetry] || 10000;
             retryCountRef.current++;
-            // console.log(`[useDetection] Retrying in ${delay}ms... (Preparing for Attempt ${retryCountRef.current + 1})`);
+            console.log(`[useDetection] Retrying in ${delay}ms... (Preparing for Attempt ${retryCountRef.current + 1})`);
             reconnectTimeoutId = window.setTimeout(connect, delay);
           } else {
-            // console.log("[useDetection] Max attempts reached");
+            console.log("[useDetection] Max attempts reached");
           }
         }
       }
