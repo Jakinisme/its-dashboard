@@ -12,6 +12,7 @@ interface StreamStateOptions {
     streamId: string;
     isLive: boolean;
     updateInterval?: number;
+    readOnly?: boolean;
 }
 
 interface StreamState {
@@ -25,6 +26,7 @@ export const useStreamState = ({
     streamId,
     isLive,
     updateInterval = 1000,
+    readOnly = false,
 }: StreamStateOptions): StreamState => {
     const [elapsedSeconds, setElapsedSeconds] = useState(0);
     const [timeAgo, setTimeAgo] = useState("Just now");
@@ -35,7 +37,7 @@ export const useStreamState = ({
     const prevIsLive = useRef<boolean | null>(null);
 
     useEffect(() => {
-        if (isInitialized.current) return;
+        if (isInitialized.current || readOnly) return;
 
         const initialize = async () => {
             try {
@@ -49,7 +51,7 @@ export const useStreamState = ({
         };
 
         initialize();
-    }, [streamId, isLive]);
+    }, [streamId, isLive, readOnly]);
 
     useEffect(() => {
         const unsubscribe = subscribeToStreamState(
@@ -80,6 +82,8 @@ export const useStreamState = ({
     }, [streamId]);
 
     useEffect(() => {
+        if (readOnly) return;
+
         if (prevIsLive.current === null) {
             prevIsLive.current = isLive;
             return;
@@ -102,7 +106,7 @@ export const useStreamState = ({
         };
 
         updateFirebase();
-    }, [isLive, streamId]);
+    }, [isLive, streamId, readOnly]);
 
     useEffect(() => {
         if (isLive || !offlineTimestamp) return;
