@@ -91,7 +91,7 @@ export const useDetection = (options: UseDetectionOptions = {}) => {
       const elapsed = now - lastUpdateTimeRef.current;
 
       if (elapsed >= detectionTimeout) {
-        console.log("[useDetection] Auto-clearing stale detections");
+        //console.log("[useDetection] Auto-clearing stale detections");
         detectionsRef.current = [];
       }
     }, detectionTimeout);
@@ -106,7 +106,7 @@ export const useDetection = (options: UseDetectionOptions = {}) => {
       if (!isMounted) return;
 
       try {
-        console.log("[useDetection] Fetching detection config...");
+        //console.log("[useDetection] Fetching detection config...");
         const config = await detectionEndpointService.getConfig();
 
         if (!isMounted) return;
@@ -128,11 +128,11 @@ export const useDetection = (options: UseDetectionOptions = {}) => {
         }
 
         ws = new WebSocket(url, [token]);
-        console.log("[useDetection] WebSocket connecting to:", url);
+        //console.log("[useDetection] WebSocket connecting to:", url);
         wsRef.current = ws;
 
         ws.onopen = () => {
-          console.log("[useDetection] WebSocket connected!");
+         // console.log("[useDetection] WebSocket connected!");
           retryCountRef.current = 0;
           retryDelayRef.current = 2000; // Reset backoff on success
         };
@@ -140,7 +140,7 @@ export const useDetection = (options: UseDetectionOptions = {}) => {
         ws.onmessage = (ev) => {
           try {
             if (ev.data.length > 100000) {
-               console.error("[useDetection] Message too large, ignoring");
+               //console.error("[useDetection] Message too large, ignoring");
               return;
             }
 
@@ -148,7 +148,7 @@ export const useDetection = (options: UseDetectionOptions = {}) => {
             const now = Date.now();
 
             if (!msg.type || typeof msg.type !== "string") {
-               console.warn("[useDetection] Invalid message type");
+               //console.warn("[useDetection] Invalid message type");
               return;
             }
 
@@ -157,7 +157,7 @@ export const useDetection = (options: UseDetectionOptions = {}) => {
               lastUpdateTimeRef.current = now;
 
               if (!msg.plants || !Array.isArray(msg.plants)) {
-                console.log("[useDetection] No plants - clearing");
+               // console.log("[useDetection] No plants - clearing");
                 detectionsRef.current = [];
                 scheduleDetectionCleanup();
                 return;
@@ -169,7 +169,6 @@ export const useDetection = (options: UseDetectionOptions = {}) => {
                 return;
               }
 
-              // Extract detections from plants array
               const detections: Detection[] = [];
 
               for (const plant of msg.plants) {
@@ -180,7 +179,6 @@ export const useDetection = (options: UseDetectionOptions = {}) => {
                 const plantId = isValidPlantId(plant.plant_id) ? plant.plant_id : 0;
                 const bbox = plant.plant_bbox as [number, number, number, number];
 
-                // Update health status from plant data
                 if (plant.plant_status) {
                   healthStatusRef.current.set(plantId, sanitizeString(plant.plant_status));
                 }
@@ -211,7 +209,6 @@ export const useDetection = (options: UseDetectionOptions = {}) => {
               scheduleDetectionCleanup();
             }
 
-            // Handle plant_with_leaves - update individual plant health
             else if (msg.type === "plant_with_leaves") {
               if (!isValidPlantId(msg.plant_id)) {
                 return;
@@ -221,10 +218,8 @@ export const useDetection = (options: UseDetectionOptions = {}) => {
               const newHealth = sanitizeString(msg.plant_status || "unknown");
               const bbox = msg.plant_bbox as [number, number, number, number] | undefined;
 
-              // Update health status
               healthStatusRef.current.set(plantId, newHealth);
 
-              // Find and update existing detection
               const det = detectionsRef.current.find(d => d.plant_id === plantId);
               if (det) {
                 det.health = newHealth;
@@ -236,7 +231,6 @@ export const useDetection = (options: UseDetectionOptions = {}) => {
                   det.y2 = Math.max(0, Math.min(1, bbox[3]));
                 }
               } else if (bbox && bbox.length === 4) {
-                // Add new detection if not seen before
                 detectionsRef.current.push({
                   x1: Math.max(0, Math.min(1, bbox[0])),
                   y1: Math.max(0, Math.min(1, bbox[1])),
@@ -249,7 +243,6 @@ export const useDetection = (options: UseDetectionOptions = {}) => {
                   timestamp: now,
                 });
 
-                // Trim to max detections
                 if (detectionsRef.current.length > maxDetections) {
                   detectionsRef.current = detectionsRef.current.slice(-maxDetections);
                 }
@@ -259,7 +252,6 @@ export const useDetection = (options: UseDetectionOptions = {}) => {
               scheduleDetectionCleanup();
             }
 
-            // Legacy: Handle wide_batch format (backward compatibility)
             else if (msg.type === "wide_batch") {
               lastUpdateTimeRef.current = now;
 
@@ -313,7 +305,6 @@ export const useDetection = (options: UseDetectionOptions = {}) => {
               scheduleDetectionCleanup();
             }
 
-            // Legacy: Handle classify format (backward compatibility)
             else if (msg.type === "classify") {
               if (!isValidPlantId(msg.plant_id)) {
                 return;
@@ -355,7 +346,7 @@ export const useDetection = (options: UseDetectionOptions = {}) => {
 
         if (isMounted) {
           const currentRetry = retryCountRef.current;
-          if (currentRetry < 2) { // Max 2 retries (3 attempts total)
+          if (currentRetry < 2) {
             const delay = RETRY_INTERVALS[currentRetry] || 10000;
             retryCountRef.current++;
             console.log(`[useDetection] Retrying in ${delay}ms... (Preparing for Attempt ${retryCountRef.current + 1})`);
