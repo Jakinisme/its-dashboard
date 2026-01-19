@@ -82,7 +82,13 @@ export const useStreamState = ({
     }, [streamId]);
 
     useEffect(() => {
-        if (readOnly) return;
+        if (isLive) {
+            setElapsedSeconds(0);
+            setTimeAgo("Just now");
+            setOfflineTimestamp(null);
+        } else {
+            setOfflineTimestamp((prev) => prev || Date.now());
+        }
 
         if (prevIsLive.current === null) {
             prevIsLive.current = isLive;
@@ -91,6 +97,8 @@ export const useStreamState = ({
 
         if (prevIsLive.current === isLive) return;
         prevIsLive.current = isLive;
+
+        if (readOnly) return;
 
         const updateFirebase = async () => {
             try {
