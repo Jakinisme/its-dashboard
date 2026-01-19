@@ -128,10 +128,11 @@ export const useDetection = (options: UseDetectionOptions = {}) => {
         }
 
         ws = new WebSocket(url, [token]);
+        console.log("[useDetection] WebSocket connecting to:", url);
         wsRef.current = ws;
 
         ws.onopen = () => {
-          // console.log("[useDetection] WebSocket connected");
+          console.log("[useDetection] WebSocket connected!");
           retryCountRef.current = 0;
           retryDelayRef.current = 2000; // Reset backoff on success
         };
