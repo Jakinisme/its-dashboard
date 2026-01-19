@@ -114,10 +114,10 @@ export const useCanvas = (options: UseCanvasRendererOptions) => {
         ctx.fillText(txt, x1 + 5, labelY + 2);
 
         if (idx === 0) {
-          console.log(`[useCanvas] Drawing detection #${idx}: cls=${cls}, ` +
-            `normalized=(${det.x1.toFixed(3)},${det.y1.toFixed(3)})-(${det.x2.toFixed(3)},${det.y2.toFixed(3)}), ` +
-            `pixel=(${x1.toFixed(0)},${y1.toFixed(0)})-(${x2.toFixed(0)},${y2.toFixed(0)}), ` +
-            `size=${boxWidth.toFixed(0)}x${boxHeight.toFixed(0)}`);
+          //console.log(`[useCanvas] Drawing detection #${idx}: cls=${cls}, ` +
+           // `normalized=(${det.x1.toFixed(3)},${det.y1.toFixed(3)})-(${det.x2.toFixed(3)},${det.y2.toFixed(3)}), ` +
+           // `pixel=(${x1.toFixed(0)},${y1.toFixed(0)})-(${x2.toFixed(0)},${y2.toFixed(0)}), ` +
+           // `size=${boxWidth.toFixed(0)}x${boxHeight.toFixed(0)}`);
         }
       });
     }
