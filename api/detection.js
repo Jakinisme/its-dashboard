@@ -69,9 +69,9 @@ export default function handler(req, res) {
             expires
         }))
             .toString('base64')
-            .replace(/\+/g, '-')   // URL-safe: + -> -
-            .replace(/\//g, '_')   // URL-safe: / -> _
-            .replace(/=+$/, '');   // Remove padding
+            .replace(/\+/g, '-')  
+            .replace(/\//g, '_')   
+            .replace(/=+$/, '');  
 
         return res.status(200).json({
             url: detectionWsEndpoint,
