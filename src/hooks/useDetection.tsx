@@ -152,7 +152,6 @@ export const useDetection = (options: UseDetectionOptions = {}) => {
               return;
             }
 
-            // Handle plants_batch from new backend
             if (msg.type === "plants_batch") {
               lastUpdateTimeRef.current = now;
 

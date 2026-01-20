@@ -11,7 +11,6 @@ const Camera = () => {
   const { timeAgo } = useStreamState({
     streamId: "vertical_farming_cam_01",
     isLive,
-    readOnly: true,
   });
 
 
